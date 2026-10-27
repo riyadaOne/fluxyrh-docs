@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "laravel-boost": {
+      "type": "stdio",
+      "command": "php",
+      "args": ["FluxyRH-web/app/artisan", "boost:mcp"]
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "@upstash/context7-mcp@4.1.1"]
+    },
+    "metro-mcp": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "metro-mcp@0.15.0", "--port", "8081"]
+    }
+  }
+}
