@@ -37,11 +37,12 @@
    - 5.17 Simulation de la masse salariale
    - 5.18 Notifications et annonces
    - 5.19 Droits : délégations et exclusions
-   - 5.20 Archive mensuelle des données
+   - 5.20 Archives des données (hors système)
    - 5.21 Charte graphique des documents (module Identité)
+   - 5.22 Factures des entreprises (plateforme)
 6. Catalogue des écrans et des permissions
 7. États d'erreur et cas limites transverses
-8. Questions ouvertes
+8. Décisions
 
 ---
 
@@ -64,7 +65,7 @@ Ce document décrit **comment on circule dans FluxyRH** : par où chaque personn
 flowchart TB
     R["fluxyrh.app<br/>Accueil public (présentation)"]
     subgraph PLT["platform.fluxyrh.app — Espace plateforme"]
-        P1[Connexion plateforme] --> P2[Tableau de bord · Entreprises · Abonnements · Modules<br/>Cartes NFC · Archives · Journal · Paramètres]
+        P1[Connexion plateforme] --> P2[Tableau de bord · Entreprises · Abonnements · Modules<br/>Cartes NFC · Factures · Journal · Paramètres]
     end
     subgraph ENT["{slug}.fluxyrh.app — un domaine par entreprise"]
         PUB["Pages publiques<br/>/badge/{id} · /invitation/{jeton} · /.well-known/assetlinks.json"]
@@ -73,7 +74,7 @@ flowchart TB
         API["/api/v1 — apps mobiles et intégrations"]
     end
     subgraph MOB["Applications mobiles"]
-        A["App Entreprise (1 build / entreprise)<br/>onglets selon le rôle"]
+        A["App Entreprise (1 app / entreprise, Android et iOS)<br/>onglets selon le rôle"]
         B["App Borne (unique)<br/>appairée à une entreprise et un site"]
         C["App Console (RIYADA ONE)"]
     end
@@ -102,8 +103,8 @@ flowchart TB
 
 ```mermaid
 flowchart TD
-    A["RH · S-20 Inviter un employé<br/>e-mail, rôle, type, poste, structure, site, manager,<br/>date d'embauche, fréquence de paie, fin d'accès éventuelle"] --> B["[Brouillon] → Envoyer"]
-    A2["PLT ou ADM · S-03 Inviter un admin sans dossier<br/>(rôle admin_entreprise uniquement, dossier optionnel, cf. §8)"] --> B
+    A["RH · S-20 Inviter (direction, paie, managers, employés)<br/>e-mail, rôle, type, poste, structure, site, manager,<br/>date d'embauche, fréquence de paie, fin d'accès éventuelle"] --> B["[Brouillon] → Envoyer"]
+    A2["PLT ou ADM · S-03 Inviter un admin sans dossier<br/>ou, pour l'ADM, le premier RH (avec dossier)"] --> B
     B --> C["[Envoyée] + rattachement [Invité]<br/>e-mail avec lien signé (valable 7 jours)"]
     C --> D{La personne a déjà<br/>un compte FluxyRH ?}
     D -- Non --> E["/invitation/{jeton}<br/>définit son mot de passe selon la politique de l'entreprise"]
@@ -146,7 +147,7 @@ flowchart TD
     LG --> M1[E-mail + mot de passe] --> F2{2FA ?}
     F2 -- Oui --> F3[Code] --> H
     F2 -- Non --> H
-    LG --> M2["Carte + PIN<br/>(option de l'entreprise, téléphone déjà activé)"] --> H
+    LG --> M2["Carte + PIN<br/>(activée par l'utilisateur sur ce téléphone)"] --> H
     H --> REG{Téléphone enregistré<br/>pour le pointage ?}
     REG -- Non --> RG["Proposition : enregistrer ce téléphone<br/>(confirmation par la carte)"]
     H --> LK{Verrouillage activé ?}
@@ -191,6 +192,8 @@ sequenceDiagram
     W-->>ADM: borne active, premier signal reçu
 ```
 
+L'admin choisit aussi, pour chaque borne, le **code de sortie du mode kiosque** et l'activation du son (S-14).
+
 ### 3.6 Connexion plateforme
 
 Web : `https://platform.fluxyrh.app/login` (mot de passe, passkey, 2FA). 🛰 Console : même compte ; onglets Accueil, Cartes, Entreprises, Journal, Profil.
@@ -205,13 +208,13 @@ Le menu web et les onglets mobiles sont filtrés par **rôle**, **permissions** 
 
 | Web | 🛰 Console |
 |---|---|
-| `/dashboard`, `/companies` (création, fiche, modules, application mobile), `/subscriptions`, `/nfc-cards` (file, livraison), `/archives` (demandes d'archive), `/activity-log`, `/settings` | Accueil · Cartes (à encoder → encodage) · Entreprises · Journal · Profil |
+| `/dashboard`, `/companies` (création, fiche, modules, application mobile), `/subscriptions`, `/nfc-cards` (file, livraison), `/invoices` (factures), `/activity-log`, `/settings` | Accueil · Cartes (à encoder → encodage) · Entreprises · Journal · Profil |
 
 ### 4.2 Administrateur entreprise
 
 | Web | 📱 |
 |---|---|
-| `/dashboard`, `/users` (S-02), `/invitations` (S-03), `/roles-permissions` (S-04), `/connected-users` (S-05), `/configuration` (S-10 : entreprise, matricule, mots de passe, pointage, relances), `/org-units` (S-11), `/sites` (S-12), `/kiosks` (S-14), `/document-branding` (S-19, carte : design neutre au socle, 20 designs et chartes avec le module Identité), `/employee-types` et `/document-types` (S-15), `/nfc-cards` (S-16 préparation), `/activity-log` (S-06), `/help` (S-90), `/archives` (S-17) | Utilisateurs · Invitations · Bornes (état, suspendre) · Cartes · Journal · Profil |
+| `/dashboard`, `/users` (S-02), `/invitations` (S-03), `/roles-permissions` (S-04), `/connected-users` (S-05), `/configuration` (S-10 : entreprise et identifiants légaux, langue, mots de passe, matricule, cartes, pointage, relances, intégrations, abonnement et factures), `/org-units` (S-11), `/job-positions` (S-13), `/sites` (S-12), `/kiosks` (S-14), `/document-branding` (S-19, carte : design neutre au socle, 20 designs et chartes avec le module Identité), `/employee-types` et `/document-types` (S-15), `/nfc-cards` (S-16 préparation), `/activity-log` (S-06), `/help` (S-90) | Utilisateurs · Invitations · Bornes (état, suspendre) · Cartes · Journal · Profil |
 
 L'admin ne voit **jamais** de salaire, de bulletin ni de coordonnée bancaire.
 
@@ -219,25 +222,25 @@ L'admin ne voit **jamais** de salaire, de bulletin ni de coordonnée bancaire.
 
 | Web | 📱 |
 |---|---|
-| `/dashboard` (S-80), `/approvals` (S-81 : périodes de paie, avances, contrats à signer), `/payroll-periods` (lecture), `/simulations` (S-82, module Masse salariale), `/compensation-models` (S-83), `/reports` (S-84, module Pilotage), `/sensitive-views` (S-85), `/announcements` | Accueil (indicateurs) · Approbations · Équipe (si manager) · Moi |
+| `/dashboard` (S-80), `/approvals` (S-81 : périodes de paie, avances, contrats, courriers et formulaires à signer, vérifications des données des RH), `/payroll-periods` (lecture), `/simulations` (S-82, module Masse salariale), `/compensation-models` (S-83), `/reports` (S-84, module Pilotage), `/sensitive-views` (S-85), `/announcements` | Accueil (indicateurs) · Approbations · Équipe (si manager) · Moi |
 
 ### 4.4 Responsable RH
 
 | Web | 📱 |
 |---|---|
-| `/employees` + fiche (S-21), `/invitations/employees` (S-20), `/verifications` (S-22), `/org-chart` (S-23), `/work-schedules` (S-30), `/holidays` (S-31), `/attendance` (S-32), `/overtime` (S-34 validation), `/leave-types` (S-35), `/leave-requests` (S-36), `/contracts` (S-40), `/contract-clauses` et `/contract-templates` (S-41), `/nfc-cards/handover` (S-18), `/payroll-periods/{id}/variables` (S-52), `/announcements` (S-70), modules : `/hr-events` (S-71), `/workflows` (S-72), `/letters` (S-73), `/form-requests` (S-74), `/evaluations` (S-75), `/skills` (S-76), `/recruitment-imports` (S-77) | Validations (données, congés, heures sup) · Employés (recherche, scan de carte) · Cartes (remise) · Moi |
+| `/employees` + fiche (S-21), `/invitations/employees` (S-20), `/verifications` (S-22), `/org-chart` (S-23), `/work-schedules` (S-30), `/holidays` (S-31), `/attendance` (S-32), `/overtime` (S-34 validation), `/leave-types` (S-35), `/leave-requests` (S-36), `/contracts` (S-40), `/contract-clauses` (S-41 bibliothèque de blocs), `/nfc-cards/handover` (S-18), `/payroll-periods/{id}/variables` (S-52), `/announcements` (S-70), modules : `/hr-events` (S-71), `/workflows` (S-72), `/letters` (S-73), `/form-requests` (S-74), `/evaluations` (S-75), `/skills` (S-76), `/recruitment-imports` (S-77) | Validations (données, congés, heures sup) · Employés (recherche, scan de carte) · Cartes (remise) · Moi |
 
 ### 4.5 Gestionnaire de paie
 
 | Web | 📱 |
 |---|---|
-| `/payroll-parameters` (S-50), `/employee-compensation` (S-51), `/payroll-periods` (S-52 à S-55), `/bank-verifications` (S-56), `/payments` (S-57), `/banks` et `/transfer-formats` (S-58), `/advances` (S-59), modules : `/declarations` (S-78), `/accounting` (S-79), `/simulations` (S-82) | Validations (banque, avances) · Paie (état de la période, lecture) · Moi |
+| `/payroll-parameters` (S-50), `/employee-compensation` (S-51), `/payroll-periods` (S-52 à S-55), `/bank-verifications` (S-56), `/payments` (S-57), `/banks` (S-58), `/advances` (S-59), modules : `/declarations` (S-78), `/accounting` (S-79), `/simulations` (S-82) | Validations (banque, avances) · Paie (état de la période, lecture) · Moi |
 
 ### 4.6 Manager
 
 | Web | 📱 |
 |---|---|
-| `/team` (S-24 : présences du jour, calendrier d'absences), `/team/attendance` (S-33 corrections), `/team/overtime` (S-34 déclaration), `/team/leave-requests` (S-36 approbation), `/team/hr-events` (S-71 proposition), `/evaluations/to-fill` (S-75) | **Équipe** (présences du jour, approbations, corrections, heures sup) · Moi |
+| `/team` (S-24 : présences du jour, calendrier d'absences), `/team/attendance` (S-33 corrections), `/team/overtime` (S-34 heures sup établies à l'avance), `/team/leave-requests` (S-36 approbation), `/team/hr-events` (S-71 proposition), `/evaluations/to-fill` (S-75) | **Équipe** (présences du jour, approbations, corrections, heures sup) · Moi |
 
 ### 4.7 Employé (espace personnel, pour tous les titulaires d'un dossier)
 
@@ -280,20 +283,21 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    A[ADM · S-10 Configuration<br/>identité, RCCM, NIU, CNPS, logo, matricule,<br/>politique de mot de passe, pointage, relances] --> B[ADM · S-11 Structure en arbre]
+    A[ADM · S-10 Configuration<br/>identité, identifiants légaux, logo, matricule,<br/>politique de mot de passe, pointage, relances] --> B[ADM · S-11 Structure en arbre · S-13 Postes]
     B --> C[ADM · S-12 Sites]
-    C --> D[ADM · S-14 Bornes : appairage §3.5]
-    A --> E[ADM · S-15 Types d'employé, types de documents,<br/>pièces obligatoires par type]
-    A --> F[ADM · S-03 Invite RH, PAIE, DIR]
-    F --> G[RH · S-30/S-31 Plannings et jours fériés<br/>S-35 types de congé · règles d'heures sup]
-    F --> H[PAIE · S-50 Vérifie et active le paramétrage de paie<br/>S-58 banques et formats de virement]
-    F --> I[RH · S-41 Clauses et modèles de contrat]
+    C --> D[ADM · S-14 Bornes : appairage §3.5,<br/>code de sortie et son de chaque borne]
+    A --> E[ADM ou RH · S-15 Types d'employé et de documents,<br/>pièces obligatoires, listes du dossier, justificatifs exigés]
+    A --> F[ADM · S-03 Invite le premier RH]
+    F --> RH[RH · S-20 Invite la direction et le gestionnaire de paie]
+    RH --> G[RH · S-30/S-31 Plannings et jours fériés<br/>S-35 types de congé · règles d'heures sup]
+    RH --> H[PAIE · S-50 Crée et active le paramétrage de paie<br/>S-58 banques]
+    RH --> I[RH · S-41 Bibliothèque de blocs de contrat]
     G --> J[RH · S-20 Invite les managers puis les employés §5.3]
     H --> J
     I --> J
 ```
 
-L'accueil de l'admin affiche une **liste de démarrage** (étapes faites / à faire) tant que la mise en place n'est pas terminée.
+L'accueil de chaque rôle affiche une **liste de démarrage** (étapes faites / à faire) tant que la mise en place n'est pas terminée. Aucune donnée propre à un pays n'est livrée : jours fériés, règles d'heures sup, types de congé, paie, blocs de contrat, banques et plan comptable sont saisis par l'entreprise (décision 0002).
 
 ### 5.3 Invitation → dossier → complétion → vérification
 
@@ -312,12 +316,13 @@ flowchart TD
     V -- Vérifiée --> OK["[Vérifiée] → devient la valeur en vigueur<br/>notification à l'employé"]
     V -- Rejetée --> KO["[Rejetée] + motif → l'employé corrige<br/>nouvelle version « À vérifier »"]
     OK --> CP{Toutes les pièces obligatoires<br/>vérifiées ?}
-    CP -- Oui --> COMP["Dossier complet<br/>congés, attestations, virements débloqués"]
+    CP -- Oui --> COMP["Dossier complet<br/>congés et attestations débloqués"]
     CP -- Non --> E
 ```
 
 - Personne ne vérifie ses **propres** données. Les données de **tout RH** sont vérifiées par la **direction** (S-22 lui est ouvert pour ces seuls dossiers), **sauf sa banque**, qui reste vérifiée par le gestionnaire de paie (S-56). La banque d'un gestionnaire de paie est vérifiée par la direction.
-- Les données importées de Jobyflow (§5.15) arrivent déjà dans l'assistant, pré-remplies, au statut « À vérifier ».
+- Les données importées de Jobyflow (§5.15) sont proposées en brouillon dans l'assistant ; l'employé les confirme et les soumet lui-même.
+- La vérification se fait une demande à la fois ; quels justificatifs sont exigés, bloc par bloc, est réglé par l'entreprise (S-15).
 
 ### 5.4 Modifier une donnée déjà vérifiée
 
@@ -336,7 +341,7 @@ L'employé voit, bloc par bloc, la valeur en vigueur et, s'il y en a une, la mod
 
 ```mermaid
 flowchart LR
-    P["ADM · S-16 Préparer<br/>[Préparée]"] --> E["PLT · 🛰 Encoder<br/>écrire → relire → confirmer · verrouillage<br/>[Encodée]"]
+    P["ADM · S-16 Préparer<br/>(identité vérifiée)<br/>[Préparée]"] --> E["PLT · 🛰 Encoder<br/>écrire → relire → confirmer · verrouillage définitif<br/>[Encodée]"]
     E --> L["PLT · web Livrer<br/>[Livrée]"]
     L --> R["RH · S-18 / 📱 Cartes · Remettre à l'employé<br/>[Remise]"]
     R --> A["EMP · 📱 Profil ou 🖥 Borne<br/>pose la carte, choisit son PIN<br/>[Active]"]
@@ -345,49 +350,58 @@ flowchart LR
     A --> X["SYS · sortie de l'employé<br/>[Désactivée]"]
 ```
 
-Tant que la carte n'est pas `Active`, l'employé ne peut pas pointer : il le signale à son manager, qui saisit une correction motivée (§5.6).
+Tant que la carte n'est pas `Active`, l'employé pointe par le **pointage de secours** de la borne, validé par son manager, ou le manager saisit une correction motivée (§5.6). Le badge public d'une carte désactivée affiche « Inconnue » ; « Plus en poste » est réservé à un employé sorti.
 
 ### 5.6 Pointage
 
 ```mermaid
 flowchart TD
-    subgraph Téléphone["Parcours téléphone (📱 Pointer)"]
+    subgraph Téléphone["Parcours téléphone (📱 Pointer, Android ou iPhone)"]
         T1[Scanne le QR affiché par la borne] --> T2[Pose sa carte au dos du téléphone]
     end
     subgraph Borne["Parcours borne (🖥)"]
         B1[Pose sa carte sur la borne]
+        B2[« Je n'ai pas ma carte »<br/>matricule + photo prise par la borne]
     end
     T2 --> V{Contrôles}
     B1 --> V
+    B2 --> SEC["[À valider] (pointage de secours)<br/>limite mensuelle réglée par l'entreprise"]
+    SEC --> MV["MGR · S-33 valide ou refuse (motif)"]
+    MV --> J
     V --> C1{Code du QR valide pour ce pas ?<br/>carte active et à lui ?<br/>site autorisé ? téléphone enregistré ?<br/>déjà pointé sur ce code ?}
     C1 -- Non --> KO[Refus avec motif affiché]
     C1 -- Oui --> D["Sens déterminé automatiquement<br/>(1er du jour = entrée, puis alternance)"]
-    D --> CF["Confirmation : nom, photo, Entrée / Sortie, heure<br/>bouton « Inverser » pendant 10 s"]
+    D --> CF["Confirmation : nom, photo, Entrée / Sortie, heure<br/>bouton « Inverser » pendant la durée réglée par l'entreprise"]
     CF --> N{Réseau ?}
     N -- Oui --> S["Envoi immédiat → [Acceptée] / [Refusée]"]
     N -- Non --> Q["File locale chiffrée · bandeau « N en attente »<br/>envoi au retour du réseau"]
-    Q --> W{Reçu dans la fenêtre<br/>(48 h) et période ouverte ?}
+    Q --> W{Reçu dans la fenêtre<br/>(48 h par défaut) et période ouverte ?}
     W -- Oui --> S
     W -- Non --> RF["[Refusée] visible par le manager"]
-    S --> J["SYS · journée recalculée<br/>heures, retard, départ anticipé, statut"]
-    J --> OT{Au-delà du planning ?}
-    OT -- Oui --> PR["Heures sup [Proposée] (§5.7)"]
-    RF --> COR["MGR · S-33 Correction motivée<br/>(oubli, carte perdue, borne en panne)"]
+    S --> J["SYS · journée recalculée<br/>heures, retard, départ anticipé, demi-journée, statut,<br/>mention « travail de nuit » si la journée passe minuit"]
+    J --> OT{Heures sup établies<br/>à l'avance pour ce jour ?}
+    OT -- Oui --> PR["Minutes réalisées calculées (§5.7)"]
+    OT -- Non --> RIEN[Temps au-delà du planning non compté]
+    RF --> COR["MGR · S-33 Correction motivée<br/>(oubli, carte perdue, borne en panne),<br/>sur les X derniers jours réglés par l'entreprise"]
     COR --> J
 ```
+
+Une journée appartient à la journée planifiée dont la fenêtre contient le pointage (de X minutes avant le début prévu à Y minutes après la fin prévue, réglés par l'entreprise).
 
 ### 5.7 Heures supplémentaires
 
 ```mermaid
 flowchart LR
-    A["SYS · [Proposée] depuis le pointage"] --> B["MGR · S-34 / 📱 Équipe<br/>confirme, ajuste ou ignore → [Déclarée]"]
-    A2[MGR · déclare directement] --> B
-    B --> C{RH · S-34}
-    C -- valide --> D["[Validée] → variable de la période de paie"]
-    C -- refuse --> E["[Refusée] + motif"]
+    A["MGR · S-34 / 📱 Équipe<br/>établit à l'avance les heures sup<br/>(employé, jour, minutes)"] --> B["[Déclarée]"]
+    B --> C["SYS · après la journée<br/>minutes réalisées d'après les pointages<br/>(dans la limite établie)"]
+    C --> D{RH · S-34}
+    D -- valide --> E["[Validée] → variable de la période de paie"]
+    D -- refuse --> F["[Refusée] + motif"]
 ```
 
-Les majorations viennent des règles de l'entreprise (seuils, nuit, repos, jour férié, plafond).
+- **Sans heure sup établie à l'avance, le temps passé au-delà du planning n'est pas compté.** Le manager établit l'heure sup avant la journée ou le jour même ; il peut la modifier ou l'annuler tant que la journée n'est pas passée.
+- Les majorations viennent des règles de l'entreprise (seuils, nuit, repos, jour férié) ; sans règle, aucune heure sup ne peut être établie.
+- Plafond hebdomadaire dépassé : avertissement, le RH peut valider avec un motif. Personne ne valide ses propres heures sup (un RH : par un autre RH ou la direction).
 
 ### 5.8 Congés et absences
 
@@ -408,32 +422,40 @@ flowchart TD
 
 Hors ligne, la demande part en file et s'affiche « en attente d'envoi » ; le contrôle de solde définitif est fait par le serveur.
 
+- Le solde affiché déduit aussi les demandes en cours. Un employé sans manager s'adresse directement au RH ; la demande d'un RH est validée par un autre RH ou par la direction.
+- Pendant le congé validé d'un manager, ses décisions (congés, corrections, heures sup) remontent à son propre manager, puis lui reviennent à son retour.
+
 ### 5.9 Contrat : rédaction → signature → fin
 
 ```mermaid
 flowchart TD
-    A[RH · S-40 Nouveau contrat<br/>choisit un modèle] --> B[Clauses du modèle insérées<br/>RH réordonne, retire, ajoute des blocs libres]
-    B --> C["Champs {{…}} complétés<br/>(dates, poste, salaire de base, horaires)"]
-    C --> D["[Brouillon] modifiable · aperçu PDF"]
-    D --> E["Envoyer pour signature<br/>valeurs figées · [À signer]"]
-    E --> F["EMP · S-68 / 📱 lit le contrat<br/>signe avec sa carte"]
-    F --> G["DIR · S-81 / 📱 Approbations<br/>signe avec sa carte"]
-    G --> H["[Signé] · PDF figé + empreinte"]
-    H --> I{Date de début atteinte ?}
+    A[RH · S-40 Nouveau contrat<br/>employé, nature du contrat] --> B[Blocs proposés selon la nature et le type d'employé<br/>présélectionnés insérés · autres blocs, blocs libres]
+    B --> C["Conditions et champs {{…}}<br/>(dates, poste, salaire de base, horaires)"]
+    C --> SG[RH ajoute les signataires et leur ordre<br/>employé + signataires de l'entreprise]
+    SG --> D["[Brouillon] modifiable · aperçu PDF"]
+    D --> E["Envoyer pour signature<br/>valeurs et PDF à signer figés · [À signer]"]
+    E --> P[Copies imprimées pour la signature manuscrite]
+    E --> F["Chaque signataire, dans l'ordre · S-68 / S-81 / 📱<br/>signe dans le système (carte, mot de passe ou code)"]
+    F -. désaccord, réglé hors système .-> M["RH modifie le contrat, toujours [À signer]<br/>nouvelle version du PDF · signatures annulées"]
+    M --> F
+    F --> G["Dernière signature → [Signé]<br/>PDF final figé + empreinte · scan papier joint (facultatif)"]
+    G --> I{Date de début atteinte ?}
     I -- Oui --> J["SYS · [Actif] (l'ancien contrat se termine)"]
     J --> K{Fin}
-    K -- échéance --> L["SYS · [Terminé] · alerte avant échéance"]
-    K -- résiliation --> M["RH · motif, type, date, document → [Résilié]<br/>workflow de sortie si module Processus RH"]
+    K -- échéance --> L["SYS · [Terminé] · alertes avant l'échéance<br/>RH : nouveau contrat, prolongation ou sortie"]
+    K -- résiliation --> R["RH · motif, type, date d'effet, document<br/>« Déclarer la sortie à cette date ? »<br/>→ [Résilié] à la date d'effet"]
     J -. modification .-> AV[Avenant : nouveau contrat lié, même circuit]
 ```
 
-Un employé sans contrat actif ne peut pas être payé : le contrôle apparaît dans la checklist de paie.
+- Un employé sans contrat actif ne peut pas être payé : le contrôle apparaît dans la checklist de paie.
+- Pas de sortie sans résiliation : déclarer la sortie d'un employé dont le contrat est actif propose d'abord la résiliation.
+- Un contrat signé après sa date de début est activé tout de suite, avec sa date d'origine.
 
 ### 5.10 Paie d'une période
 
 ```mermaid
 flowchart TD
-    O["Période [Ouverte] par fréquence<br/>(mensuelle, quinzaine, hebdomadaire, journalière)<br/>ouverte par PAIE ou par SYS si ouverture automatique"] --> V1["RH · S-52 Variables<br/>présences, absences, congés non payés,<br/>heures sup validées, événements"]
+    O["Période [Ouverte] par fréquence<br/>(mensuelle, quinzaine, hebdomadaire, journalière)<br/>ouverte par PAIE ou par SYS si ouverture automatique"] --> V1["RH · S-52 Variables<br/>présences, absences, congés non payés,<br/>heures sup validées"]
     V1 --> CK1{Checklist : étapes RH bloquantes}
     CK1 -- incomplète --> V1
     CK1 -- OK --> V2["RH valide → [Variables validées]"]
@@ -445,9 +467,9 @@ flowchart TD
     AP -- renvoi avec motif --> C
     AP -- approuve --> AA["[Approuvée]"]
     AA --> CL["PAIE · Clôturer → [Clôturée]<br/>bulletins publiés, période verrouillée"]
-    CL --> PUB["EMP · S-65 / 📱 Documents<br/>bulletin, accusé de réception par carte"]
-    CL --> VIR["PAIE · S-57 Ordres de virement par banque<br/>(dossiers bancaires vérifiés seulement)"]
-    VIR --> PAY["Marquer [Payé] / [Échec]"]
+    CL --> PUB["EMP · S-65 / 📱 Documents<br/>bulletin, accusé de réception (avec ou sans carte)"]
+    CL --> VIR["Paiements faits hors système<br/>(virement, espèces, mobile money)"]
+    VIR --> PAY["PAIE · S-57 enregistre [Payé] / [Échec]"]
     CL --> DEC["Module Conformité : déclarations, export comptable (§5.16)"]
     CL --> NX{Ouverture automatique<br/>activée pour cette fréquence ?}
     NX -- Oui --> AUTO["SYS · période suivante [Ouverte]<br/>étape de checklist cochée par le Système"]
@@ -470,7 +492,7 @@ flowchart LR
     D -- accepte --> E["[Acceptée]"]
     E --> F{DIR · S-81}
     F -- refuse --> R
-    F -- approuve --> G["[Approuvée] · échéancier créé"]
+    F -- approuve --> G["[Approuvée] · avance versée hors système<br/>échéancier créé"]
     G --> H["SYS · échéance prélevée à chaque paie<br/>[En remboursement] → [Soldée]"]
 ```
 
@@ -479,35 +501,38 @@ flowchart LR
 ```mermaid
 flowchart TD
     A["MGR · S-71 Proposer un événement<br/>promotion, mutation, sanction, félicitation…"] --> B["[Proposé]"]
-    A2[RH · crée directement] --> C
+    A2[RH · crée directement] --> V
     B --> C{RH}
     C -- refuse --> R["[Refusé] + motif"]
     C -- valide --> V["[Validé] · effet appliqué à la date d'effet<br/>(poste, structure, site, manager, type)<br/>historique d'affectation mis à jour"]
     V --> W{Workflow associé ?}
-    W -- mutation --> WM[Workflow de mutation]
-    S["RH · sortie d'un employé<br/>(résiliation, démission, fin de contrat)"] --> ES["Employé [En sortie]"] --> WS[Workflow de sortie]
-    I[Invitation acceptée] --> WE[Workflow d'entrée]
+    W -- mutation --> WM[Lancement proposé au RH :<br/>workflow de mutation]
+    S["RH · sortie d'un employé<br/>(résiliation, démission, fin de contrat)"] --> ES["Employé [En sortie]"] --> WS[Lancement proposé au RH :<br/>workflow de sortie]
+    I[Invitation acceptée] --> WE[Lancement proposé au RH :<br/>workflow d'entrée]
     WE & WS & WM --> T["Tâches par acteur avec échéances<br/>(remise de matériel, accès, carte, solde de tout compte…)<br/>e-mails et notifications"]
     T --> FIN{Toutes faites ?}
     FIN -- Oui --> DONE["[Terminé]"]
     WS --> OUT["SYS · à la date de sortie : employé [Sorti]<br/>carte désactivée, rattachement révoqué, dossier en lecture seule"]
 ```
 
-Sans le module, la sortie se fait directement par la résiliation du contrat et le passage du dossier à `Sorti`.
+Sans le module, la sortie se fait directement par la résiliation du contrat et le passage du dossier à `Sorti`. Avec le module, le RH lance ou écarte (motif) chaque workflow proposé ; il peut exclure une personne d'une tâche, et l'employé concerné en est toujours exclu.
 
 ### 5.13 Courriers en masse et formulaires types (module Processus RH)
 
-- **Courriers** : RH · S-73 choisit un modèle → sélectionne les destinataires (structure, site, type, liste) → aperçu → envoi : un PDF par destinataire dans 📱 Documents + e-mail ; accusé de réception par carte si exigé ; suivi des accusés.
-- **Formulaires** : EMP · S-67 demande une attestation → `[Demandé]` → RH · S-74 vérifie et génère → `[Prêt]` (ou `[Refusé]` avec motif) → l'employé télécharge → `[Remis]`. Bloqué si le dossier est incomplet.
+- **Courriers** : RH · S-73 choisit un modèle → sélectionne les destinataires (structure, site, type, liste) → aperçu → si le modèle exige la **signature de la direction**, la campagne attend cette signature (DIR · S-81) → envoi : un PDF figé par destinataire dans 📱 Documents + **lien** par e-mail (jamais le PDF en pièce jointe) ; accusé de réception (avec ou sans carte) si exigé ; suivi et relance des accusés.
+- **Formulaires** : EMP · S-67 demande une attestation → `[Demandé]` → le rôle qui traite ce type (RH ou PAIE) · S-74 vérifie et génère → `[À signer]` si la signature de la direction est exigée → `[Prêt]` (ou `[Refusé]` avec motif) → l'employé télécharge (ou accuse réception si exigé) → `[Remis]`. Bloqué si le dossier est incomplet.
 
 ### 5.14 Évaluation 360° (module Talents)
 
 ```mermaid
 flowchart LR
-    A["RH · S-75 Campagne [Brouillon]<br/>critères, poids (somme = 100), employés,<br/>évaluateurs (auto, manager, pairs, collaborateurs)"] --> B["[Ouverte] · notifications"]
+    A["RH · S-75 Campagne [Brouillon]<br/>critères, poids (somme = 100), anonymat par type d'évaluateur,<br/>employés, évaluateurs choisis à la main (un par un ou par groupe)"] --> B["[Ouverte] · notifications"]
     B --> C["Chaque évaluateur · S-75 / 📱<br/>remplit une fois → soumis"]
-    C --> D["RH · clôture → [Clôturée]<br/>score final pondéré, immuable"]
-    D --> E[Rapport visible par l'employé et son manager]
+    C --> D{Toutes les réponses reçues ?}
+    D -- Non --> R[RH relance, ou retire un évaluateur défaillant (motif)]
+    R --> C
+    D -- Oui --> E["RH · clôture → [Clôturée]<br/>score final pondéré, immuable"]
+    E --> F[Rapport visible par l'employé et son manager,<br/>selon l'anonymat de la campagne]
 ```
 
 ### 5.15 Import Jobyflow (module Talents)
@@ -524,17 +549,18 @@ sequenceDiagram
     W->>W: invitations [Brouillon] pré-remplies
     W->>J: accusé d'import
     RH->>W: envoie les invitations (§3.1)
-    Note over W: À l'acceptation, données et pièces<br/>arrivent « À vérifier » dans l'assistant
+    Note over W: À l'acceptation, données et pièces<br/>proposées en brouillon dans l'assistant ;<br/>l'employé les confirme et les soumet
 ```
 
 ### 5.16 Déclarations et export comptable (module Conformité)
 
-- **Déclaration** : PAIE · S-78 crée une déclaration (CNPS, fiscale, bilan social) sur une ou plusieurs périodes **clôturées** → lignes calculées automatiquement + informations complémentaires saisies → `[Préparée]` (export du fichier) → dépôt manuel auprès de l'organisme → `[Déposée]` avec la référence.
-- **Export comptable** : PAIE · S-79 choisit une période clôturée, le format (générique CSV / XLSX, Sage) et le regroupement → fichier généré, journalisé, rejouable.
+- **Modèles** : PAIE · S-78 décrit ses modèles de déclaration (organisme social, administration fiscale…) : colonnes reliées à une rubrique, un total de paie, une donnée du dossier, ou à saisir ; et compose son **bilan social** à partir d'un catalogue d'indicateurs. Aucun formulaire de pays n'est livré.
+- **Déclaration** : PAIE · S-78 crée une déclaration d'après un modèle, sur une ou plusieurs périodes **clôturées** → lignes calculées + informations complémentaires saisies → `[Préparée]` (export du fichier) → dépôt manuel auprès de l'organisme → `[Déposée]` avec la référence.
+- **Export comptable** : PAIE · S-79 saisit ou importe son plan comptable, relie chaque rubrique à ses comptes, puis choisit une période clôturée, le format (générique CSV / XLSX, Sage 100) et le regroupement → fichier généré, journalisé, rejouable.
 
 ### 5.17 Simulation de la masse salariale (module Masse salariale)
 
-DIR ou PAIE · S-82 : choisit une période de référence → ajoute des hypothèses (hausse globale ou ciblée, rubrique ajoutée / retirée / modifiée, variation d'effectif) → calcule → résultats par périmètre → enregistre → compare plusieurs simulations côte à côte.
+DIR ou PAIE · S-82 : choisit une période de référence → ajoute des hypothèses (hausse globale ou ciblée, rubrique ajoutée / retirée / modifiée, variation d'effectif) → calcule → résultats par périmètre → enregistre sous un nom (retrouvée par nom ou date de création) → compare plusieurs simulations côte à côte. Une simulation n'écrit jamais rien dans la vraie paie.
 
 ### 5.18 Notifications et annonces
 
@@ -553,9 +579,9 @@ flowchart LR
 
 ADM · S-04 Rôles et permissions : la matrice croise les écrans (section 6) et les rôles. Cocher un écran le **délègue** à un rôle ; une **exclusion** retire un écran à une personne. Effet immédiat sur le web, les onglets mobiles (`/me` renvoie les permissions) et les contrôles serveur. Les écrans d'un module non souscrit sont grisés. Les **champs sensibles** ne se délèguent pas (TRD §9.1).
 
-### 5.20 Archive mensuelle des données
+### 5.20 Archives des données (hors système)
 
-ADM ou DIR · S-17 demande l'archive du mois → `[Demandée]` → PLT / SYS prépare (tableurs par domaine, PDF des contrats et bulletins, pièces ; données sensibles seulement si le demandeur y a droit) → `[Prête]` : lien signé, valable 7 jours → `[Expirée]`.
+Les archives demandées par une entreprise (mensuelles ou à la résiliation) sont préparées **hors système** par RIYADA ONE, à partir des sauvegardes ; l'application n'a pas de fonction d'archive (PRD F-PLT-06).
 
 ### 5.21 Charte graphique des documents (module Identité)
 
@@ -568,12 +594,16 @@ flowchart TD
     C --> P["Aperçu : bulletin, contrat, attestation, e-mail, carte<br/>(documents fictifs, rien n'est enregistré)"]
     P --> V["ADM · Activer → [Active]<br/>l'ancienne version passe [Archivée] · journalisé"]
     V --> G["Documents générés ensuite : nouvelle charte<br/>documents déjà générés : inchangés"]
-    S["DIR · S-08 dépose sa signature (image)"] --> SG["Apposée seulement sur les documents<br/>qu'il signe par carte (contrat, avenant, courrier)"]
+    S["DIR · S-08 dépose sa signature (image)"] --> SG["Apposée seulement sur les documents<br/>qu'il a signés dans le système<br/>(contrat, avenant, courrier, formulaire)"]
 ```
 
 - La charte ne change **pas** l'interface web, mobile ou borne (identité FluxyRH neutre, nom et logo du client).
 - Arrêt du module : les nouveaux documents reprennent la charte neutre et la carte le design neutre ; les cartes déjà imprimées et les PDF déjà générés ne changent pas.
 - Personne d'autre que le directeur ne peut déposer, remplacer ou retirer sa signature ; un directeur qui quitte l'entreprise voit sa signature révoquée.
+
+### 5.22 Factures des entreprises (plateforme)
+
+PLT · `/invoices` : chaque mois, la plateforme **propose** les factures à émettre (montant calculé selon le palier, les modules, l'option Identité et la fréquence) → l'admin plateforme relit et émet → PDF numéroté `[À payer]` → paiement fait hors système → PLT enregistre `[Payée]` (ou `[Annulée]` avec motif). L'admin de l'entreprise consulte ses factures dans la Configuration.
 
 ---
 
@@ -595,10 +625,10 @@ Les écrans marqués **délégable** sont des valeurs de l'enum `Permission` (BA
 | S-10 Configuration | `/configuration` | ADM | ✅ `configuration` | Socle |
 | S-11 Structure | `/org-units` | ADM, RH | ✅ `org_units` | Socle |
 | S-12 Sites | `/sites` | ADM | ✅ `sites` | Socle |
+| S-13 Postes | `/job-positions` | ADM, RH | ✅ `job_positions` | Socle |
 | S-14 Bornes | `/kiosks` | ADM | ✅ `kiosks` | Socle |
 | S-15 Types d'employé et de documents | `/employee-types`, `/document-types` | ADM, RH | ✅ `reference_types` | Socle |
 | S-16 Préparation des cartes | `/nfc-cards` | ADM | ✅ `card_preparation` | Socle |
-| S-17 Archives | `/archives` | ADM, DIR | ✅ `archives` | Socle |
 | S-18 Remise des cartes | `/nfc-cards/handover` | RH | ✅ `card_handover` | Socle |
 | S-19 Charte graphique des documents (et design de carte) | `/document-branding` | ADM | ✅ `document_branding` | Socle (charte neutre, design neutre) / Identité (modèles, réglages, 20 designs) |
 
@@ -620,7 +650,7 @@ Les écrans marqués **délégable** sont des valeurs de l'enum `Permission` (BA
 | S-31 Jours fériés | `/holidays` | RH | ✅ `holidays` | Socle |
 | S-32 Présences | `/attendance` | RH, DIR | ✅ `attendance` | Socle |
 | S-33 Corrections de pointage | `/team/attendance` | MGR | ✅ `attendance_corrections` | Socle |
-| S-34 Heures supplémentaires | `/overtime` | MGR (déclarer), RH (valider) | ✅ `overtime` | Socle |
+| S-34 Heures supplémentaires | `/overtime` | MGR (établir à l'avance), RH (valider) | ✅ `overtime` | Socle |
 | S-35 Types de congé et règles d'heures sup | `/leave-types` | RH | ✅ `leave_settings` | Socle |
 | S-36 Demandes de congé | `/leave-requests` | MGR (approuver), RH (valider) | ✅ `leave_requests` | Socle |
 
@@ -629,7 +659,7 @@ Les écrans marqués **délégable** sont des valeurs de l'enum `Permission` (BA
 | Écran | Chemin | Rôles par défaut | Délégable | Module |
 |---|---|---|---|---|
 | S-40 Contrats | `/contracts` | RH | ✅ `contracts` | Socle |
-| S-41 Clauses et modèles | `/contract-clauses`, `/contract-templates` | RH | ✅ `contract_library` | Socle |
+| S-41 Bibliothèque de blocs | `/contract-clauses` | RH | ✅ `contract_library` | Socle |
 
 ### 6.5 Paie
 
@@ -642,8 +672,8 @@ Les écrans marqués **délégable** sont des valeurs de l'enum `Permission` (BA
 | S-54 Période : contrôle et bulletins | `/payroll-periods/{id}/payslips` | PAIE | ✅ `payroll_control` | Socle |
 | S-55 Checklist de paie | `/payroll-periods/{id}/checklist` | RH, PAIE | ✅ `payroll_checklist` | Socle |
 | S-56 Vérification bancaire | `/bank-verifications` | PAIE | ✅ `bank_verifications` | Socle |
-| S-57 Paiements et virements | `/payments` | PAIE | ✅ `payments` | Socle |
-| S-58 Banques et formats | `/banks`, `/transfer-formats` | PAIE | ✅ `bank_settings` | Socle |
+| S-57 Paiements (enregistrement des paiements faits hors système) | `/payments` | PAIE | ✅ `payments` | Socle |
+| S-58 Banques | `/banks` | PAIE | ✅ `bank_settings` | Socle |
 | S-59 Avances et prêts | `/advances` | PAIE | ✅ `advances` | Socle |
 
 Les écrans de paie restent soumis aux champs sensibles : déléguer `payroll_variables` à un rôle ne lui montre aucun montant.
@@ -695,7 +725,8 @@ S-60 Accueil et assistant de complétion · S-61 Mon dossier · S-62 Mes documen
 | Hors ligne | — | Bandeau ; cache ; pointages et demandes en file ; refus motivés affichés |
 | Pointage refusé (code expiré, carte inactive, site non autorisé, appareil inconnu, rejeu, fenêtre dépassée, période clôturée) | Visible par le manager (S-33) | Message explicite à l'employé |
 | Borne révoquée ou suspendue | — | Écran « Borne désactivée, contactez l'administrateur » |
-| Dossier incomplet | Congés, attestations, virements bloqués avec la liste des pièces manquantes | Idem |
+| Dossier incomplet | Congés et attestations bloqués avec la liste des pièces manquantes ; signalé dans le suivi des paiements | Idem |
+| Carte perdue ou oubliée | Pointage de secours validé ou refusé par le manager (S-33) | 🖥 « Je n'ai pas ma carte » : matricule + photo, statut « à valider » |
 | Période de paie clôturée | Actions désactivées sur ses données | Refus 422 |
 | Checklist non satisfaite | Étapes bloquantes ❌ listées, action désactivée | — |
 | Vérification de ses propres données | Action absente | — |
@@ -712,4 +743,12 @@ S-60 Accueil et assistant de complétion · S-61 Mon dossier · S-62 Mes documen
 | Dossier de l'admin entreprise | **Optionnel** : un admin peut être interne (avec dossier, carte, pointage, espace personnel) ou externe (prestataire IT, sans dossier ni espace personnel). L'invitation « compte sans dossier » (§3.1) est réservée au rôle `admin_entreprise` ; un admin sans dossier peut en recevoir un plus tard par une invitation employé liée à son compte |
 | Vérification des données d'un RH | **Toujours la direction**, qu'il y ait un ou plusieurs RH (§5.3), sauf ses coordonnées bancaires, vérifiées par le gestionnaire de paie |
 | Charte graphique | Documents générés seulement (PDF, e-mails, carte) ; socle neutre ; module Identité hors pack : 12 modèles, palette fermée, cachet, signature déposée par le directeur, filigrane, 20 designs de carte (§5.21) |
+| Invitations | L'ADM invite le premier RH (et les admins sans dossier) ; le RH invite tous les autres, direction et paie compris |
+| Équipe | L'équipe d'une personne = ses subordonnés directs et indirects, quel que soit son rôle |
+| Signature | Avec ou sans carte pour les documents (mot de passe sur le web, code ou biométrie dans l'app) ; carte obligatoire pour le pointage |
+| Contrats | Blocs proposés, signataires choisis par le RH, copies papier + signature dans le système, modifiables tant que toutes les signatures ne sont pas réunies (§5.9) |
+| Heures sup | Établies à l'avance par le manager, sinon non comptées (§5.7) |
+| Paiements, archives | Hors système ; FluxyRH enregistre les paiements (§5.10, §5.20) |
+| Workflows | Lancement proposé au RH, jamais automatique (§5.12) |
+| Vérification | Une demande à la fois, jamais groupée |
 | Ouverture des périodes de paie | La **dernière étape de la checklist** d'une période est « Ouvrir la période suivante » : à la clôture, le système la **propose** au gestionnaire de paie. L'entreprise peut activer l'**ouverture automatique** par fréquence ; la période suivante est alors ouverte par le système dès la clôture (§5.10) |

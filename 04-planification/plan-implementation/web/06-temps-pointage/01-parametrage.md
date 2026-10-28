@@ -44,8 +44,8 @@ W05 livré.
 
 ### W06.1.2 — Réglages du pointage
 
-- Migration : ajout à `clocking_settings` de `code_step_seconds` = 30, `offline_window_hours` = 48, `phone_clocking_enabled` = 1, et les réglages de la demi-journée (`half_day_enabled`, `half_day_min_percent`, `full_day_min_percent`), du travail de nuit (`shift_window_before_minutes`, `shift_window_after_minutes`), de la durée du bouton « Inverser » (`direction_inversion_seconds`) et du délai de correction des journées (`correction_window_days`), tous ajoutés au BACKEND SCHEMA.
-- Onglet **Pointage** de la Configuration (ADM) : pas du code, fenêtre hors ligne, pointage par téléphone autorisé, demi-journée (activation et seuils), fenêtre du travail de nuit, durée du bouton « Inverser », délai de correction des journées, délai d'alerte d'une borne silencieuse (créé en W03).
+- Migration : ajout à `clocking_settings` de `code_step_seconds` = 30, `offline_window_hours` = 48, `phone_clocking_enabled` = 1, et les réglages de la demi-journée (`half_day_enabled`, `half_day_min_percent`, `full_day_min_percent`), du travail de nuit (`shift_window_before_minutes`, `shift_window_after_minutes`), de la durée du bouton « Inverser » (`direction_inversion_seconds`) du délai de correction des journées (`correction_window_days`) et du nombre maximal de pointages de secours par employé et par mois (`emergency_monthly_limit`), tous ajoutés au BACKEND SCHEMA.
+- Onglet **Pointage** de la Configuration (ADM) : pas du code, fenêtre hors ligne, pointage par téléphone autorisé, demi-journée (activation et seuils), fenêtre du travail de nuit, durée du bouton « Inverser », délai de correction des journées, pointages de secours, délai d'alerte d'une borne silencieuse (créé en W03).
 - Les bornes reçoivent le pas du code par `/kiosk/config` (W03.6).
 
 ### W06.1.3 — Jours fériés
@@ -72,7 +72,7 @@ W05 livré.
 - `App\Services\Tenant\OvertimeRuleService` : règles par nature (`jour_ouvre`, `nuit`, `repos_hebdomadaire`, `jour_ferie`), seuils journaliers et hebdomadaires, plage de nuit, plafond hebdomadaire, ordre des tranches ; contrôles de cohérence (tranches sans trou ni chevauchement, plage de nuit valide).
 - S-35 `/leave-types`, onglet **Règles d'heures sup**.
 
-**Critère de fin** : une configuration incohérente est refusée avec un message clair ; une entreprise sans règle ne reçoit aucune proposition d'heures sup.
+**Critère de fin** : une configuration incohérente est refusée avec un message clair ; sans règle d'heures sup, le manager ne peut pas en établir.
 
 ### W06.1.6 — Mise en place et API
 
@@ -104,6 +104,6 @@ W05 livré.
 
 | Élément | Module |
 |---|---|
-| Pointage, calcul des journées, heures sup proposées | W06.2 |
+| Pointage, calcul des journées, heures sup réalisées | W06.2 |
 | Types de congé (onglet de S-35) | W07 |
 | Planning dans l'app | E04 |

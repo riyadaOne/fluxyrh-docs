@@ -17,7 +17,7 @@
 
 ## Fichiers modifiés
 
-- `04-planification/ROADMAP.md` : 54 entrées (W00 à W16 et sous-fichiers, E00 à E10, B00 à B03, C00 à C02, MEP), seul endroit où les statuts sont suivis.
+- `04-planification/ROADMAP.md` : 53 entrées (W00 à W16 et sous-fichiers, E00 à E10, B00 à B03, C00 à C02, MEP), seul endroit où les statuts sont suivis.
 - `01-specifications/PRD.md` : §8.5 (ordre de développement), F-PAY-02 (aucun paramétrage de pays), F-PAY-08 (paiements hors système), F-EMP-02 (types par défaut modifiables), F-EMP-09, F-NFC-05 (connexion par carte choisie par l'utilisateur), F-NFC-06 (signature avec ou sans carte), F-PLT-06 et NF-09 (archives hors système), F-TPS-06 (heures sup établies à l'avance), §10, §11, §13 (décisions), annexe 14.3 (jeu de démonstration).
 - `01-specifications/TRD.md` : §4.1 (noms des dépôts `fluxyrh-w-app`, `fluxyrh-m-*`), §5.3 (provisionnement), §14.1 (aucun paramétrage de pays).
 - `FluxyRH-web/README.md`, `FluxyRH-mobile/README.md` (dossiers de l'espace de travail, hors dépôt git) : noms des dépôts.

@@ -23,6 +23,7 @@ Recevoir et juger chaque pointage, puis en tirer les journées de présence et l
 | F-TPS-04 | Heures travaillées, retard, départ anticipé, absence, selon le planning |
 | F-TPS-06 (réalisation) | Minutes réalisées des heures sup établies, selon les règles |
 | F-NFC-06 (pointage) | Confirmation du pointage par la carte |
+| F-TPS-08 (serveur) | Pointage de secours de la borne, statut « à valider » |
 | NF-05, T-11, T-15 | Anti-fraude, créations idempotentes par UUID d'appareil |
 
 À lire : PRD §7.6 ; TRD §12 (en entier), §20 ; APPFLOW §5.6, §5.7, §7 ; BACKEND SCHEMA §5.6, §8, §9 (points 3, 8) ; UX/UI §7.3.
@@ -39,6 +40,8 @@ W06.1 livré.
 | Inversion du sens | Faite sur l'appareil pendant une durée **réglée par l'entreprise** (W06.1.2), transmise aux apps et aux bornes ; l'appareil envoie le sens et `direction_inverted_at` ; le serveur ne l'accepte que dans ce délai après la capture |
 | Heures sup | **Rien n'est compté automatiquement** : le temps passé après l'horaire ne devient une heure sup que si le manager l'a **établie à l'avance** pour cet employé et ce jour (W06.3) ; le système calcule alors les minutes réellement faites, dans la limite de ce qui a été établi |
 | Signature du pointage | Chaque pointage accepté crée une `action_signature` (`pointage`, canal, appareil ou borne) |
+| Pointage de secours (borne) | Construit ici pour l'app Borne (B03) : « Je n'ai pas ma carte » → matricule → photo prise par la borne → statut **`a_valider`** (nouvelle valeur de `ClockingStatus`), qui ne compte qu'après la validation du manager (W06.3) ; nombre maximal par employé et par mois réglé par l'entreprise (W06.1.2) ; photo sur le disque privé |
+| Confirmation hors ligne sur la borne | La borne garde en cache chiffré la liste des cartes actives des employés autorisés sur son site (empreinte de la carte, nom, photo), fournie par `/kiosk/config` et mise à jour à chaque signal de vie (décision de B02) |
 | Carte inconnue | Un pointage dont la carte n'est rattachée à aucun employé de l'entreprise est refusé **sans être stocké** (pas d'employé à qui l'attribuer) et compté dans le journal de la borne |
 | Période de paie clôturée | Le refus « période clôturée » est ajouté en W09.6, quand les périodes existent |
 
@@ -56,7 +59,7 @@ Motifs de refus (liste fermée, traduits) : code invalide ou expiré, carte inac
 
 ### W06.2.1 — Enums
 
-- `ClockingStatus`, `ClockingDirection`, `ClockingRefusal` (motifs, à ajouter au BACKEND SCHEMA §7), `AttendanceDayStatus`, `OvertimeSource`, `OvertimeStatus`.
+- `ClockingStatus`, `ClockingDirection`, `ClockingRefusal` (motifs, à ajouter au BACKEND SCHEMA §7), `AttendanceDayStatus`, `OvertimeStatus` (`OvertimeSource` retiré : toute heure sup est établie par le manager).
 
 ### W06.2.2 — Code temporel
 
@@ -86,6 +89,8 @@ Motifs de refus (liste fermée, traduits) : code invalide ou expiré, carte inac
 
 - `/api/v1/employee/clockings` (POST, lot, UUID générés par l'appareil ; GET, historique personnel) ; `/employee/clockings/{id}` (résultat).
 - `/api/v1/kiosk/clockings` (POST, lot signé par la borne, W03.6) ; `/kiosk/heartbeat` enrichi du nombre de pointages reçus et refusés.
+- `/api/v1/kiosk/config` enrichi : durée du bouton « Inverser » (W06.1.2) et liste des cartes actives des employés autorisés sur le site (§4).
+- `/api/v1/kiosk/emergency-clockings` : pointage de secours (matricule, photo, signé par la borne), limite mensuelle contrôlée, statut `a_valider` (§4).
 - Réponse par pointage : statut, motif traduit, nom et photo vérifiés pour l'écran de confirmation.
 - Limites de débit adaptées aux bornes (arrivées groupées le matin).
 - Contrat Scramble à jour.
@@ -108,7 +113,7 @@ Motifs de refus (liste fermée, traduits) : code invalide ou expiré, carte inac
 
 ### W06.2.7 — Mes pointages
 
-- S-63 `/me/clockings` : pointages acceptés et refusés (motif), journées du mois, heures sup proposées ; aucune modification.
+- S-63 `/me/clockings` : pointages acceptés et refusés (motif), journées du mois, heures sup établies et réalisées ; aucune modification.
 
 ### W06.2.8 — Outils de développement
 

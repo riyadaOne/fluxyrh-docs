@@ -125,9 +125,9 @@ La révocation n'efface ni l'identité ni l'historique ; elle supprime les sessi
 
 ### W02.9 — Configuration de l'entreprise
 
-- Migration d'entreprise `company_profile`.
+- Migrations d'entreprise `company_profile`, `company_legal_identifiers`.
 - S-10 `/configuration` (navlist UX/UI §5.3), onglets de W02 :
-  - **Entreprise** : raison sociale, nom commercial, logo (disque privé), RCCM, NIU, n° CNPS, adresse, ville, téléphone, e-mail, secteur ;
+  - **Entreprise** : raison sociale, nom commercial, logo (disque privé), adresse, ville, téléphone, e-mail, secteur, et **identifiants légaux** (liste paramétrable : libellé, valeur, affiché ou non sur les documents, ordre ; table `company_legal_identifiers` ajoutée au BACKEND SCHEMA, colonnes `rccm`, `niu`, `cnps_employer_number` retirées de `company_profile`) ;
   - **Langue, fuseau, devise** : modifient `companies` par un service (devise modifiable jusqu'au verrouillage de W09.1) ;
   - **Mots de passe** : politique et rôles soumis à la 2FA (W02.5).
 - Les onglets Matricule (W04.1), Relances (W04.3), Pointage (W06.1) sont ajoutés par leurs modules.

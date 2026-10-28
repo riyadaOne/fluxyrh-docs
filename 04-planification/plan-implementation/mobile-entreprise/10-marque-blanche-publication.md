@@ -1,6 +1,6 @@
 # E10 — FluxyRH Entreprise · Marque blanche et publication
 
-Dépôt : `FluxyRH-mobile/entreprise/` (fluxyrh-m-entreprise), avec une étape dans `FluxyRH-web/app/` · Dépend de : E09
+Dépôt : `FluxyRH-mobile/entreprise/` (fluxyrh-m-entreprise) · Dépend de : E09
 
 ## 1. Objet
 
@@ -22,23 +22,21 @@ E09 livré. Pour chaque entreprise : icône et nom fournis par le client ; proje
 
 | Sujet | Proposition |
 |---|---|
-| Format de l'export | Fichier de flavor : nom de l'app, `applicationId`, URL de l'API, slug, couleur de l'icône adaptative ; complété ici depuis la version minimale de W01.9 |
+| Format de l'export | Fichier livré par W01.9 : nom de l'app, identifiants Android et iOS, URL de l'API, slug, couleur de l'icône adaptative |
 | Signature | Une clé de téléversement par app, conservée hors dépôt par le développeur ; signature des builds par Google Play |
-| App Links | Colonne `mobile_android_sha256` ajoutée à `companies` (BACKEND SCHEMA) et saisie sur la fiche « Application mobile » ; route `/.well-known/assetlinks.json` servie par chaque sous-domaine d'entreprise |
+| App Links et Universal Links | Colonnes et routes livrées en W01.9 ; ici, l'empreinte du certificat Android et l'identifiant d'équipe Apple sont saisis sur la fiche « Application mobile » au moment de la publication |
 | Build sous Windows | Android depuis un chemin court (piège 12), commandes Gradle données au développeur ; iOS sur le Mac ou le service de build choisi en E00 |
 | Publication iOS d'une app en marque blanche | Apple refuse en général les apps produites depuis un même modèle si elles ne sont pas publiées par le propriétaire du contenu (règle 4.2.6 de l'App Store, **à vérifier dans les règles en vigueur au moment de la publication**) : **décision : publication depuis le compte Apple Developer de RIYADA ONE**, en assumant le risque d'un refus ; en cas de refus, repli sur un compte Apple ouvert par l'entreprise cliente |
-| Universal Links | Colonne `mobile_ios_team_id` ajoutée à `companies` (BACKEND SCHEMA) ; route `/.well-known/apple-app-site-association` servie par chaque sous-domaine d'entreprise |
 
 ## 4. Étapes ordonnées
 
 ### E10.1 — Flavors
 
 - Génération d'un flavor Android et d'une cible iOS (scheme, bundle id) à partir du fichier exporté (W01.9) : identifiants, nom, icône, URL, fichiers Firebase du flavor (déposés par le développeur) ; flavor `demo` conservé.
-- Format définitif de l'export mis à jour dans le web (W01.9).
 
-### E10.2 — App Links et Universal Links (web)
+### E10.2 — App Links et Universal Links
 
-- Dans `FluxyRH-web/app/` : colonnes `mobile_android_sha256` et `mobile_ios_team_id`, champs sur la fiche « Application mobile », routes `/.well-known/assetlinks.json` et `/.well-known/apple-app-site-association` par entreprise, tests.
+- Saisie de l'empreinte du certificat Android et de l'identifiant d'équipe Apple sur la fiche « Application mobile » (W01.9) ; vérification des deux fichiers servis par le sous-domaine de l'entreprise.
 - Dans l'app : filtre d'intention `VIEW` avec `autoVerify` (Android) et domaine associé `applinks:{slug}.fluxyrh.app` (iOS) sur `https://{slug}.fluxyrh.app/badge/*`.
 
 ### E10.3 — Publication

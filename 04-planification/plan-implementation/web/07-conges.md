@@ -69,7 +69,7 @@ W06 livré.
 ### W07.4 — Absence du manager et décideur
 
 - `TeamScope::decisionMaker(employee, date)` : manager direct, ou premier supérieur présent (§3) ; sans manager : RH.
-- Branchement sur toutes les décisions du manager : approbation de congé (W07), corrections de journée (W06.3), déclaration des heures sup (W06.3) ; le supérieur voit les éléments de l'équipe de son subordonné absent dans ses propres écrans, signalés « en remplacement de… ».
+- Branchement sur toutes les décisions du manager : approbation de congé (W07), corrections de journée (W06.3), heures sup établies à l'avance (W06.3), validation des pointages de secours (W06.3) ; le supérieur voit les éléments de l'équipe de son subordonné absent dans ses propres écrans, signalés « en remplacement de… ».
 
 **Critère de fin** : un manager en congé ne reçoit plus de décisions ; son supérieur les reçoit pendant l'absence ; au retour, ce qui reste en attente revient au manager direct.
 

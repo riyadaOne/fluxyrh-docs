@@ -1,6 +1,6 @@
 # B03 — FluxyRH Borne · Activation de carte et pointage de secours
 
-Dépôt : `FluxyRH-mobile/borne/` (fluxyrh-m-borne), avec une étape dans `FluxyRH-web/app/` · Dépend de : B02
+Dépôt : `FluxyRH-mobile/borne/` (fluxyrh-m-borne) · Dépend de : B02
 
 ## 1. Objet
 
@@ -22,14 +22,14 @@ B02 livré.
 | Sujet | Proposition |
 |---|---|
 | Activation sur la borne | Bouton discret « Activer ma carte » : pose de la carte remise par le RH (statut `remise`), choix du PIN deux fois sur un clavier à l'écran, envoi signé (`/kiosk/card/activate`, W05.6) |
-| Pointage de secours | Le PRD le prévoit (§11) mais les spécifications ne le décrivent pas. Retenu : bouton « Je n'ai pas ma carte » → saisie du **matricule** → **photo prise par la caméra de la borne** → pointage enregistré avec le statut **« à valider »** (nouvelle valeur de `ClockingStatus`), qui ne compte qu'après la validation du manager (écran des corrections, W06.3) ou son refus. BACKEND SCHEMA et APPFLOW §5.6 mis à jour |
+| Pointage de secours | Le PRD le prévoit (§11) mais les spécifications ne le décrivent pas. Retenu : bouton « Je n'ai pas ma carte » → saisie du **matricule** → **photo prise par la caméra de la borne** → pointage enregistré avec le statut **« à valider »** (nouvelle valeur de `ClockingStatus`), qui ne compte qu'après la validation du manager (écran des corrections, W06.3) ou son refus. construit côté serveur en W06.2 et W06.3 |
 | Abus du secours | Nombre de pointages de secours par employé et par mois limité (réglable par l'entreprise) ; au-delà, refus avec « adressez-vous à votre manager » |
 
 ## 4. Étapes ordonnées
 
-### B03.1 — Serveur (web)
+### B03.1 — Serveur
 
-- Dans `FluxyRH-web/app/` : statut « à valider », photo de secours (disque privé), limite mensuelle dans les réglages du pointage, validation et refus par le manager dans les corrections (W06.3), tests.
+- Livré par le web : statut « à valider », photo, limite mensuelle (W06.1.2, W06.2), validation et refus par le manager (W06.3). Rien à construire côté serveur ici.
 
 ### B03.2 — Activation de la carte
 

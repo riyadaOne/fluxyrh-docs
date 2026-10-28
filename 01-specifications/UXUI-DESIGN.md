@@ -4,9 +4,9 @@
 |---|---|
 | **Produit** | FluxyRH — SIRH SaaS multi-entreprises |
 | **Éditeur** | RIYADA ONE TECHNOLOGIES SARL |
-| **Version du document** | 1.0 (brouillon) — 2026-10-27 |
+| **Version du document** | 1.1 (brouillon) — 2026-10-28 : aligné sur les décisions du plan d'implémentation |
 | **Lecteurs** | Équipe technique (web et mobile) |
-| **Statut** | Règles **cibles** ; les maquettes seront produites phase par phase (§15) |
+| **Statut** | Règles **cibles** ; les maquettes sont proposées par Claude et validées module par module (§16) |
 | **Documents liés** | PRD, TRD, APPFLOW (écrans `S-xx`, navigation par rôle), BACKEND SCHEMA (statuts) |
 
 ---
@@ -30,7 +30,7 @@
 15. Rédaction de l'interface
 16. Maquettes à produire
 17. Liste de contrôle avant de livrer un écran
-18. Questions ouvertes
+18. Décisions
 
 ---
 
@@ -57,7 +57,7 @@ Ce document fixe **les règles d'interface** de FluxyRH : tokens, mises en page,
 | U9 | **Trois langues sans compromis** | Chaque écran est vérifié en arabe (droite à gauche) |
 | U10 | **Valeur en vigueur, modification en attente** | Une donnée vérifiable montre toujours la valeur qui fait foi et, à côté, la modification « À vérifier » s'il y en a une |
 | U11 | **Le secret se voit** | Une valeur sensible non autorisée est remplacée par `••••` avec une icône cadenas et une info-bulle « Information réservée » ; jamais une cellule vide qui ferait croire à une donnée manquante |
-| U12 | **Signer est un geste** | Toute signature par carte passe par un écran dédié qui montre ce qui est signé, puis demande de poser la carte ; le résultat est confirmé visuellement |
+| U12 | **Signer est un geste** | Toute signature passe par un écran dédié qui montre ce qui est signé, puis demande la preuve : la carte, le mot de passe (web) ou le code ou la biométrie du téléphone ; le résultat est confirmé visuellement. Le pointage exige toujours la carte |
 | U13 | **Sobriété** | Interface noir et blanc ; la couleur est réservée aux statuts et aux alertes |
 
 ---
@@ -121,7 +121,7 @@ Ces couleurs ne servent **jamais** à la décoration. Les graphiques des tableau
 | Titres éditoriaux (page d'accueil `fluxyrh.app`) | Instrument Serif | Instrument Sans semi-gras |
 | Chiffres, matricules, montants, codes | Instrument Sans avec `tabular-nums` ; IBM Plex Mono pour les codes et matricules | IBM Plex Mono |
 
-Sur mobile, les polices sont embarquées dans l'application (ressources Android), comme pour UnivPlus.
+Sur mobile, les polices sont embarquées dans l'application (Android et iOS), comme pour UnivPlus.
 
 Tailles mobiles : caption 12 · small 13 · body 15 · input 16 · title 17 · heading 20 · display 24 · figure 32. Borne : multiplier par 2 (§8).
 
@@ -163,7 +163,7 @@ Groupes, dans l'ordre (chaque entrée n'apparaît que si le rôle, une délégat
 8. **Conformité** (module) : déclarations, export comptable
 9. **Pilotage** (module) : rapports, simulations, modèles de rémunération
 10. **Communication** : annonces
-11. **Administration** : utilisateurs, invitations, rôles et permissions, connectés, structure, sites, bornes, cartes, journal, archives
+11. **Administration** : utilisateurs, invitations, rôles et permissions, connectés, structure, postes, sites, bornes, cartes, journal
 
 **Menu utilisateur** (bas) : Paramètres (profil, sécurité : mot de passe, 2FA, passkeys ; apparence ; langue), **Configuration** de l'entreprise (ADM), Aide, Déconnexion. **[OBLIGATOIRE]** Aucun libellé ne déborde.
 
@@ -198,7 +198,7 @@ Configuration, Paramètres, paramétrage de paie : `flux:navlist` à gauche (≈
 - Création, modification, confirmation dans une `flux:modal` ; confirmation = `confirmX(id)` puis `x()`. Jamais `wire:confirm`.
 - Modales larges, champs courts sur deux colonnes.
 - Listes déroulantes larges + « Autre » (civilité, lien de parenté, type de pièce, motif de sortie…).
-- Téléphone : composant `x-phone-input` (indicatif par défaut +235).
+- Téléphone : composant `x-phone-input` ; indicatif par défaut celui choisi dans la Configuration de l'entreprise, aucun indicatif codé (décision 0002).
 - Montants : saisie avec séparateurs de milliers, devise affichée à droite, jamais tapée.
 - Erreurs sous le champ, traduites.
 
@@ -224,6 +224,8 @@ Configuration, Paramètres, paramétrage de paie : `flux:navlist` à gauche (≈
 - Chaque bloc affiche son badge (`Vérifiée`, `À vérifier`, `Rejetée` avec le motif).
 - Côté employé, le bouton du bloc est « Modifier » ; une modification crée une version en attente (U10).
 - L'onglet Banque n'existe que pour les rôles autorisés (U11) ; pour les autres, l'onglet est absent.
+- Le justificatif est demandé ou non selon le réglage de l'entreprise, bloc par bloc ; les listes (situation matrimoniale, type de pièce) sont celles de l'entreprise.
+- Selon les modules : onglets Événements, Workflows, Compétences, Carrière, Rémunération (PAIE, DIR).
 
 ### 6.4 Liste de vérification (S-22, S-56)
 
@@ -234,6 +236,8 @@ Liste des versions en attente, filtrable par bloc, site, structure et anciennet�
 | Valeur en vigueur | Nouvelle valeur (champs modifiés surlignés) | Justificatif (aperçu image / PDF, zoom) |
 
 Boutons **Vérifier** et **Rejeter** (motif obligatoire), raccourcis clavier, passage automatique à la demande suivante.
+
+La vérification se fait **une demande à la fois**, jamais par lot ; le justificatif est toujours visible avant la décision.
 
 ### 6.5 Assistant de complétion (S-60)
 
@@ -259,11 +263,11 @@ Frise des statuts en haut ; checklist à gauche (bloquants ❌ avec lien pour r�
 
 ### 6.7 Éditeur de contrat (S-40)
 
-Deux panneaux : à gauche la **bibliothèque de clauses** (par catégorie, recherche, glisser pour insérer) ; à droite le **contrat** en blocs ordonnés (poignée de déplacement, retirer, « + Bloc libre »). Les champs de fusion apparaissent comme des **pastilles** `{{Nom de l'employé}}` insérables depuis un menu. Aperçu PDF à tout moment. Une fois `À signer`, l'éditeur passe en lecture seule et affiche les signataires attendus.
+Deux panneaux : à gauche la **bibliothèque de blocs**, avec en tête les **blocs proposés** pour la nature du contrat et le type d'employé (recherche, glisser pour insérer) ; à droite le **contrat** en blocs ordonnés (poignée de déplacement, retirer, « + Bloc libre », « Enregistrer dans la bibliothèque »). Les champs de fusion apparaissent comme des **pastilles** `{{Nom de l'employé}}` insérables depuis un menu (éditeur Tiptap). Un panneau **Signataires** permet d'ajouter l'employé et les signataires de l'entreprise, et de fixer leur ordre. Aperçu PDF à tout moment. Une fois `À signer`, l'éditeur reste modifiable : un bandeau prévient que toute modification crée une nouvelle version et annule les signatures déjà faites ; les signatures attendues et faites sont listées, avec le téléchargement des copies à imprimer et le dépôt du scan signé.
 
 ### 6.8 Approbations (S-81)
 
-Boîte de réception unique de la direction : périodes de paie, avances, contrats à signer, vérifications des données des RH. Chaque élément montre le résumé, les montants (autorisés) et les actions « Approuver » / « Renvoyer » (motif).
+Boîte de réception unique de la direction : périodes de paie, avances, contrats, courriers et formulaires à signer, vérifications des données des RH (et de la banque des PAIE), heures sup et congés des RH quand aucun autre RH n'existe. Chaque élément montre le résumé, les montants (autorisés) et ses actions : « Approuver » / « Renvoyer » (motif) pour une décision, « Signer » pour un document (mot de passe sur le web, carte ou code dans l'app).
 
 ### 6.9 Matrice des droits (S-04)
 
@@ -286,6 +290,8 @@ Tableau écrans × rôles, cases à cocher ; défauts du rôle signalés ; écra
 | `x-blocked-reason` | Encadré « Pourquoi c'est bloqué » + lien d'action |
 | `x-phone-input`, `x-money-input` | Saisies normalisées |
 | `x-mobile-app-invite` | Encart d'installation de l'app quand les liens des stores existent |
+| `x-sign-panel` | Signature d'un document sur le web : résumé, empreinte courte, confirmation par le mot de passe |
+| `x-rich-editor` | Éditeur Tiptap maison (contrats, courriers, annonces), avec pastilles de champs |
 | Cloche de notifications | Compteur, liste, tout marquer lu |
 
 ---
@@ -294,9 +300,11 @@ Tableau écrans × rôles, cases à cocher ; défauts du rôle signalés ; écra
 
 ### 7.1 Composants `@shared/ui`
 
-Socle repris d'UnivPlus et adapté aux tokens FluxyRH : `Screen`, `ScreenHeader` (logo de l'entreprise), `AppText`, `Button`, `TextField`, `SearchField`, `Card`, `Badge`, `ListItem` / `ListGroup`, `Banner`, `EmptyState`, `Loading` (squelettes libellés), `Avatar`, `ChipSelect`, `SegmentedControl`, `CheckboxRow`, `SettingsRow`, `OfflineBanner`, `Icon`, `Logo`, barre d'onglets. Nouveaux : `QrScanner`, `NfcZone` (pose de carte), `SignSheet` (signature par carte), `VersionDiff`, `SensitiveValue`, `Stepper`, `CountdownButton` (« Inverser » 10 s), `BalanceCard` (solde de congé).
+Socle repris d'UnivPlus et adapté aux tokens FluxyRH : `Screen`, `ScreenHeader` (logo de l'entreprise), `AppText`, `Button`, `TextField`, `SearchField`, `Card`, `Badge`, `ListItem` / `ListGroup`, `Banner`, `EmptyState`, `Loading` (squelettes libellés), `Avatar`, `ChipSelect`, `SegmentedControl`, `CheckboxRow`, `SettingsRow`, `OfflineBanner`, `Icon`, `Logo`, barre d'onglets. Nouveaux : `QrScanner`, `NfcZone` (pose de carte), `SignSheet` (signature avec la carte, le code ou la biométrie), `VersionDiff`, `SensitiveValue`, `Stepper`, `CountdownButton` (« Inverser », durée réglée par l'entreprise), `BalanceCard` (solde de congé).
 
 **[OBLIGATOIRE]** Un nouveau besoin commun = un nouveau composant ici.
+
+L'app Entreprise existe sur **Android et iOS** : sur iPhone, la pose de la carte passe par la feuille système Core NFC (« Approchez votre carte ») et le verrouillage accepte Face ID ; le reste de l'interface est identique.
 
 ### 7.2 Navigation
 
@@ -337,7 +345,7 @@ Retours explicites en cas de refus (code expiré : « Rescannez le QR », carte 
 | Hors ligne | `OfflineBanner` « Hors ligne · synchronisé le … à … » ; consultation du cache ; pointages et demandes en file |
 | Erreur | `ErrorState` avec le message traduit du serveur et « Réessayer » |
 | Vide | `EmptyState` qui explique |
-| Signature | `SignSheet` : résumé de ce qui est signé (titre, empreinte courte), « Posez votre carte », confirmation |
+| Signature | `SignSheet` : résumé de ce qui est signé (titre, empreinte courte), « Posez votre carte » ou code / biométrie du téléphone, confirmation |
 | Action définitive | Confirmation dans l'écran, jamais une alerte native |
 | Formulaire | Bouton principal pleine largeur collé au-dessus du clavier |
 | Valeur sensible | `SensitiveValue` (masquée par défaut, révélée d'un appui pour l'employé lui-même : bulletins, banque) |
@@ -356,18 +364,20 @@ Configuration, matrice des droits, paramétrage de paie, calcul et contrôle de 
 | Thème | **Clair forcé**, contraste maximal ; QR noir sur blanc pur |
 | Lisibilité | Lisible à 1,5 m : heure en 64 pt, consignes en 28 pt |
 | Écran d'attente | Nom de l'entreprise et du site, heure, date, **QR dynamique** (≥ 60 % de la largeur), barre de renouvellement de 30 s, « Posez votre carte ici » avec flèche vers le lecteur NFC |
-| Confirmation | Plein écran pendant les 10 s de la fenêtre d'inversion (la carte suivante la ferme) : photo, nom, **Entrée** (fond `success`) ou **Sortie** (fond `neutral`), heure, bouton « Inverser » avec compte à rebours 10 s |
+| Confirmation | Plein écran pendant la durée d'inversion réglée par l'entreprise (la carte suivante la ferme) : photo, nom, **Entrée** (fond `success`) ou **Sortie** (fond `neutral`), heure, bouton « Inverser » avec compte à rebours |
 | Refus | Plein écran `danger` 3 s, motif en une phrase |
 | Hors ligne | Pastille discrète « Hors ligne · N pointages en attente » ; le pointage continue normalement |
 | Révocation / suspension | Écran « Borne désactivée · contactez l'administrateur » |
-| Sortie du mode kiosque | Appui long de 5 s dans un coin + code admin ; jamais de bouton visible |
-| Son | Bip court distinct pour succès et refus (désactivable) |
+| Sortie du mode kiosque | Appui long de 5 s dans un coin + code choisi par l'admin pour cette borne ; jamais de bouton visible |
+| Pointage de secours | Bouton discret « Je n'ai pas ma carte » : matricule, photo prise par la borne, message « Pointage à valider par votre manager » |
+| Activation de carte | Bouton discret « Activer ma carte » : pose de la carte, PIN saisi deux fois sur un clavier à l'écran |
+| Son | Bip court distinct pour succès et refus, activé ou non par l'admin pour chaque borne |
 
 ---
 
 ## 9. Application Console
 
-Mêmes tokens et composants ; onglets Accueil (indicateurs), Cartes (file à encoder → `NfcZone` d'écriture avec étapes écrire, relire, verrouiller), Entreprises, Journal, Profil.
+Mêmes tokens et composants ; onglets Accueil (indicateurs), Cartes (file à encoder → `NfcZone` d'écriture avec étapes écrire, relire, verrouiller ; le verrouillage est **définitif** et demande une confirmation), Entreprises (lecture, factures comprises), Journal, Profil. Verrouillage de l'app à chaque ouverture. Android seulement.
 
 ---
 
@@ -379,9 +389,9 @@ Une même famille de sens garde la même couleur partout ; la couleur est défin
 |---|---|---|
 | Neutre / brouillon / terminé | Brouillon, Terminé, Archivée, Inactif, Sortie (pointage) | `neutral` |
 | En cours de traitement | Demandée, Ouverte, Calculée, En préparation, En cours | `info` |
-| En attente d'un tiers | Invité, À vérifier, Approuvée manager, Déclarée, Proposé, À signer, Remise, En attente d'appairage, À payer, Contrôlée | `warning` |
-| Validé / actif / réussi | Actif, Vérifiée, Validée, Signé, Approuvée, Clôturée, Payé, Prête, Remis, Entrée (pointage), Présent | `success` |
-| Refusé / bloquant / échec | Refusée, Rejetée, Annulée, Révoqué, Désactivée, Suspendu, Échec, Absent, Pointage refusé | `danger` |
+| En attente d'un tiers | Invité, À vérifier, À valider (pointage de secours), Approuvée manager, Déclarée, Proposé, Proposée (workflow), À payer (facture), À signer, Remise, En attente d'appairage, À payer, Contrôlée | `warning` |
+| Validé / actif / réussi | Actif, Vérifiée, Validée, Signé, Approuvée, Clôturée, Payé, Prête, Remis, Lancée (workflow), Payée (facture), Entrée (pointage), Présent | `success` |
+| Refusé / bloquant / échec | Refusée, Rejetée, Annulée, Révoqué, Désactivée, Suspendu, Échec, Absent, Pointage refusé, Écartée (workflow), Annulée (facture) | `danger` |
 
 Le badge porte **toujours** le libellé traduit du statut (la couleur n'est jamais le seul signal).
 
@@ -393,7 +403,7 @@ Le badge porte **toujours** le libellé traduit du statut (la couleur n'est jama
 - Arabe : `dir="rtl"` au web, `direction` à la racine sur mobile et sur la Borne ; icônes directionnelles inversées ; frises d'étapes et tableaux vérifiés en arabe.
 - Séparateurs dans les clés (`'{{label}} : {{value}}'`).
 - Langue de l'interface = choix de la personne ; langue des documents, e-mails, push et de la Borne = **langue officielle** de l'entreprise (la Borne peut proposer un sélecteur de langue discret).
-- Données saisies (noms de postes, de structures) : une seule langue, celle de l'entreprise ; libellés des rubriques de paie, clauses et articles d'aide : traduisibles.
+- Données saisies (noms de postes, de structures, blocs de contrat, modèles de courrier) : une seule langue, celle de l'entreprise ; libellés des rubriques de paie et articles d'aide : traduisibles ; valeurs créées par le système (types par défaut, listes de départ) : dans la langue officielle (décision 0002).
 
 ---
 
@@ -411,13 +421,14 @@ Le badge porte **toujours** le libellé traduit du statut (la couleur n'est jama
 
 ### 13.1 Règles communes
 
-- En-tête de l'entreprise : logo, raison sociale, RCCM, NIU, n° CNPS employeur, adresse ; pied de page avec référence, date de génération et empreinte courte pour les documents signés.
+- Documents rédigés dans la **langue officielle** de l'entreprise.
+- En-tête de l'entreprise : logo, raison sociale, identifiants légaux choisis par l'entreprise (libellé et valeur), adresse ; pied de page avec référence, date de génération et empreinte courte pour les documents signés.
 - Charte neutre par défaut (noir et blanc), ou charte de l'entreprise (§13.5) ; imprimable en A4 portrait ; tableaux et positions en px (contraintes dompdf : ni flexbox, ni grid, ni variables CSS) ; polices sous `storage/app/public/fonts/documents` ; arabe par ar-php.
 - Toujours générés depuis des **données vérifiées** (P3).
 
 ### 13.2 Bulletin de paie
 
-Une page : identité de l'employé (matricule, poste, structure, date d'embauche, n° CNPS, type), période et date de paiement ; tableau des rubriques (code, libellé, base, taux, gains, retenues salariales, part patronale) ; totaux (brut, cotisations, imposable, impôt, net à payer) ; **net en lettres** ; cumuls annuels ; mode de paiement ; mention d'accusé de réception par carte le cas échéant.
+Une page : identité de l'employé (matricule, poste, structure, date d'embauche, n° CNPS, type), période et date de paiement ; tableau des rubriques (code, libellé, base, taux, gains, retenues salariales, part patronale) ; totaux (brut, cotisations, imposable, impôt, net à payer) ; **net en lettres** ; cumuls annuels ; mode de paiement ; mention de l'accusé de réception le cas échéant.
 
 ### 13.3 Carte employé
 
@@ -430,7 +441,7 @@ Une page : identité de l'employé (matricule, poste, structure, date d'embauche
 
 ### 13.4 Contrats, attestations, courriers
 
-Mise en page texte sobre, numérotation des pages, bloc des signataires avec la mention « Signé électroniquement par carte le … » et l'empreinte du document.
+Mise en page texte sobre, numérotation des pages, bloc des signataires avec la mention « Signé électroniquement dans FluxyRH le … » et le moyen (carte, mot de passe, code), et l'empreinte du document ; mention de la version signée.
 
 ### 13.5 Chartes des documents (module Identité)
 
@@ -471,7 +482,7 @@ Mise en page texte sobre, numérotation des pages, bloc des signataires avec la 
 
 **Réglages** : couleur ; logo affiché ou non ; lignes de mentions légales, site web, texte du pied ; cachet (image) ; filigrane (aucun, logo, « Confidentiel », « Copie », texte court).
 
-**Signature de la direction** : déposée par le directeur dans « Ma signature » (S-08), apposée seulement à côté de la mention de sa signature par carte. Cachet et signature : fond transparent, 300 dpi minimum, aperçu avant enregistrement.
+**Signature de la direction** : déposée par le directeur dans « Ma signature » (S-08), apposée seulement à côté de la mention de sa signature dans le système. Cachet et signature : fond transparent, 300 dpi minimum, aperçu avant enregistrement.
 
 **Écran S-19** : à gauche les réglages, à droite l'aperçu avec des onglets Bulletin · Contrat · Attestation · E-mail · Carte ; bouton **Activer** avec confirmation (« Les documents générés à partir de maintenant utiliseront cette charte ; les documents existants ne changent pas »). Sans le module : la charte neutre en lecture seule et une présentation du module.
 
@@ -484,7 +495,7 @@ Mise en page texte sobre, numérotation des pages, bloc des signataires avec la 
 ## 14. Pages publiques
 
 - **Badge** `/badge/{id}` : page minimale, logo et nom de l'entreprise, photo, nom, poste, grand badge `En poste` (`success`) / `Plus en poste` (`danger`) / `Inconnue` (`neutral`), date et heure de la vérification ; aucune autre donnée ; `noindex`.
-- **Accueil `fluxyrh.app`** : page de présentation noir et blanc, sans prix ni formulaire, coordonnées de RIYADA ONE, trois langues, mode sombre ; maquette à produire.
+- **Accueil `fluxyrh.app`** : page de présentation noir et blanc, sans prix ni formulaire, coordonnées de RIYADA ONE, trois langues, mode sombre ; maquette proposée par Claude et validée avant W01.12, page construite en W01.
 
 ---
 
@@ -502,22 +513,25 @@ Mise en page texte sobre, numérotation des pages, bloc des signataires avec la 
 
 ## 16. Maquettes à produire
 
-À produire **phase par phase** (PRD §8.5), avant le développement de chaque phase, et à valider avec le porteur du projet.
+Proposées par Claude **module par module**, avant le développement de chaque module du plan d'implémentation (`04-planification/plan-implementation/`), et validées par le porteur du projet.
 
-| Phase | Maquettes |
+| Module | Maquettes |
 |---|---|
-| 1 | Connexion, invitation, changement de mot de passe imposé, plateforme (entreprises), administration (utilisateurs, matrice des droits, connectés) |
-| 2 | Structure, sites, **Bornes** (gestion et appairage), écran de la **Borne** |
-| 3 | **Assistant de complétion**, **Mon dossier**, fiche RH, **liste de vérification** |
-| 4 | Cartes (préparation, remise, activation), Console |
-| 5 | **Pointer** (mobile), présences, corrections, heures sup |
-| 6 | Congés (employé, manager, RH) |
-| 7 | **Éditeur de contrat**, signature par carte |
-| 8 | **Période de paie**, paramétrage des rubriques, bulletin PDF, virements |
-| 9 | Annonces, notifications, aide |
-| 10–14 | Écrans des modules |
-| 15 | Module Identité : écran **Charte graphique** (S-19), **12 modèles de charte** sur bulletin, contrat, attestation et e-mail, **20 designs de carte employé**, « Ma signature » (S-08) |
-| Transverse | Tableau de bord « À faire », accueil `fluxyrh.app`, charte neutre des documents et design neutre de la carte |
+| W01 | Plateforme (connexion, entreprises, abonnements, factures, tableau de bord), **accueil `fluxyrh.app`** |
+| W02 | Connexion, invitation, changement de mot de passe imposé, utilisateurs, matrice des droits, connectés, configuration, journal |
+| W03 | Structure, postes, sites, **Bornes** (gestion, appairage, code de sortie), organigramme |
+| W04 | **Assistant de complétion**, **Mon dossier**, fiche RH, **liste de vérification**, approbations |
+| W05 | Cartes (préparation, remise, Ma carte), badge public, design neutre de la carte |
+| W06 | Plannings, jours fériés, règles d'heures sup, présences, corrections, heures sup établies, feuille de temps |
+| W07 | Congés (employé, manager, RH), calendrier d'équipe |
+| W08 | Bibliothèque de blocs, **éditeur de contrat** (blocs proposés, signataires), signature sur le web |
+| W09 | **Période de paie**, paramétrage des rubriques, rémunérations, bulletin PDF, paiements, avances, états |
+| W10 | Annonces, notifications, accueils par rôle, aide |
+| W11 à W15 | Écrans des modules (déclarations et modèles, bilan social, événements, workflows, courriers, formulaires, tableaux de bord, rapports, simulations, évaluations, compétences, imports) |
+| W16 | **Charte graphique** (S-19), **12 modèles de charte** sur bulletin, contrat, attestation et e-mail, **20 designs de carte**, « Ma signature » (S-08) |
+| E00 à E10 | App Entreprise : connexion, onglets par rôle, **Pointer**, dossier, carte, congés, contrats, paie, communication, modules |
+| B00 à B03 | **Écran de la Borne** (attente, confirmation, refus, secours, activation, hors ligne, désactivée) |
+| C00 à C02 | Console (file des cartes, encodage, entreprises) |
 
 **[OBLIGATOIRE]** Lire la maquette de l'écran avant de le coder ; l'écran livré lui est fidèle.
 
@@ -557,4 +571,9 @@ Mise en page texte sobre, numérotation des pages, bloc des signataires avec la 
 | Charte graphique | Documents générés seulement (PDF, e-mails, carte), jamais l'interface ; 12 modèles, palette fermée de 11 couleurs, cachet, signature, filigrane ; module Identité hors pack (§13.5) |
 | Police | Instrument Sans (+ IBM Plex Sans Arabic, IBM Plex Mono) (§4.3) |
 | Logo FluxyRH | **Nouveau logo**, dessiné par le porteur du projet (SVG, traits en `currentColor` pour suivre les thèmes clair et sombre) ; composant `x-app-logo` réservé en attendant |
-| Maquettes | Produites phase par phase, plus tard (§16) |
+| Maquettes | Proposées par Claude et validées module par module (§16) |
+| Signature | Écran dédié avec la carte, le mot de passe (web) ou le code / la biométrie (app) ; carte obligatoire pour le pointage (U12) |
+| Applications | Entreprise sur Android et iOS ; Borne et Console sur Android |
+| Éditeur de texte | Tiptap dans un composant maison `x-rich-editor` (pas de licence Flux Pro) |
+| Vérification | Une demande à la fois, jamais par lot |
+| Documents | Rédigés dans la langue officielle de l'entreprise, identifiants légaux choisis par elle |

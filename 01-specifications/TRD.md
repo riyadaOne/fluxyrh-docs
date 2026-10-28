@@ -102,7 +102,7 @@ flowchart LR
 - **Deux niveaux de base** : une base générale et une base MySQL par entreprise (§5).
 - **Rendu serveur** : Livewire 4 (composants single-file) + Flux UI ; pas de SPA web.
 - **Mobile natif** React Native CLI, qui ne parle qu'à l'API REST versionnée `/api/v1`.
-- **Tâches longues** (calcul de paie, archives, e-mails, push, imports Jobyflow) en file d'attente.
+- **Tâches longues** (calcul de paie, génération des PDF, e-mails, push, imports Jobyflow) en file d'attente.
 - **Serveur dédié** à FluxyRH, isolé d'UnivPlus.
 
 ---
@@ -128,6 +128,8 @@ Versions de référence : celles d'UnivPlus au 2026-10-27. Elles sont relevées 
 | Arabe dans les PDF | khaled.alshamaa/ar-php | 7.x |
 | QR code | endroid/qr-code | 6.x |
 | Formules de paie | symfony/expression-language | 7.x |
+| Assainissement HTML | symfony/html-sanitizer | 7.x |
+| Éditeur de texte riche | Tiptap (npm), dans un composant Livewire maison | — |
 | Calcul décimal | brick/math (ou `bcmath`) | — |
 | Import / export tableur | openspout/openspout ou spatie/simple-excel | — |
 | CSS / build | Tailwind CSS 4, Vite | — |
@@ -139,7 +141,7 @@ Versions de référence : celles d'UnivPlus au 2026-10-27. Elles sont relevées 
 
 ### 3.2 Mobile (`FluxyRH-mobile/entreprise/`, `borne/`, `console/`)
 
-Pile identique à UnivPlus : React Native CLI (bare), TypeScript strict, React Navigation 7, TanStack Query + persister, openapi-fetch / openapi-react-query, react-native-mmkv (chiffré), react-native-keychain, NetInfo, react-native-nfc-manager, Firebase Messaging (app Entreprise), react-native-config (flavors), i18next, Jest + RNTL, ESLint, Prettier. S'y ajoute un lecteur de QR (`react-native-vision-camera` + scanner de codes) pour l'app Entreprise.
+Pile identique à UnivPlus : React Native CLI (bare), TypeScript strict, React Navigation 7, TanStack Query + persister, openapi-fetch / openapi-react-query, react-native-mmkv (chiffré), react-native-keychain, NetInfo, react-native-nfc-manager, Firebase Messaging (app Entreprise), react-native-config (flavors), i18next, Jest + RNTL, ESLint, Prettier. S'y ajoute un lecteur de QR (`react-native-vision-camera` + scanner de codes) pour l'app Entreprise. L'app Entreprise est construite pour **Android et iOS** (iOS : Core NFC, builds sur un Mac ou un service de build en ligne) ; les apps Borne et Console pour Android seulement.
 
 **[OBLIGATOIRE]** Avant d'utiliser une bibliothèque, consulter sa documentation à jour (MCP `context7` côté mobile, `search-docs` de Boost côté Laravel).
 
@@ -272,7 +274,7 @@ Espace borne : `ResolveCompany` → `EnsureSupportedAppVersion` → `auth:sanctu
 | Garde | Utilisateurs | Mise en œuvre |
 |---|---|---|
 | `web` | Personnes rattachées à une entreprise | Fortify (connexion, réinitialisation, 2FA, confirmation) ; inscription publique désactivée |
-| `platform` | Admins RIYADA ONE | Contrôleurs dédiés, 2FA et passkeys |
+| `platform` | Admins RIYADA ONE (créés par la commande `fluxyrh:platform-admin`) | Contrôleurs dédiés, 2FA obligatoire en production, passkeys |
 | `sanctum` | Apps mobiles et bornes | Jetons personnels (UUID, suppression logique) ; un jeton de borne n'est lié à aucune personne |
 
 **Une identité, plusieurs entreprises** : un `users` par personne, un `user_company` par entreprise (rôle, statut, `access_ends_at` facultatif). L'acceptation d'une invitation distingue un compte neuf d'un compte existant et **crée le dossier employé** (F-EMP-01) dans la même transaction.
@@ -357,7 +359,7 @@ Les données du dossier saisies par l'employé (état civil, coordonnées, pièc
 - Le dossier pointe vers la **version en vigueur** de chaque donnée (pointeurs `current_*_version_id`, Backend Schema §5.4), mise à jour uniquement par `VerifiableDataService::verify()`.
 - `VerifiableDataService` : `submit()` (propriétaire), `verify()` / `reject()` (vérificateur habilité, jamais le propriétaire lui-même), notifications, journal. Le vérificateur dépend de la nature et du propriétaire : RH en général, gestionnaire de paie pour la banque, **direction** pour les données d'un RH (sa banque reste vérifiée par le gestionnaire de paie) et pour la banque d'un gestionnaire de paie.
 - La paie, les contrats, les documents et les rapports lisent **toujours** la version en vigueur.
-- `CompletenessService` calcule la complétude à partir des pièces obligatoires configurées par type d'employé (F-EMP-09) et expose `isComplete()` utilisé par les services de congés, de formulaires types et d'ordres de virement.
+- `CompletenessService` calcule la complétude à partir des pièces obligatoires configurées par type d'employé (F-EMP-09) et expose `isComplete()` utilisé par les services de congés et de formulaires types (et affiché comme signalement dans le suivi des paiements).
 
 ---
 
@@ -367,15 +369,16 @@ Les données du dossier saisies par l'employé (état civil, coordonnées, pièc
 
 | Domaine | Services |
 |---|---|
+| Plateforme | `CompanyService`, `CompanyProvisioningService`, `SubscriptionService`, `SubscriptionPricingService`, `CompanyModuleService`, `InvoiceService` |
 | Accès et organisation | `InvitationService`, `RattachementService`, `OrganizationService`, `SiteService`, `KioskService`, `PermissionService`, `FieldAccess`, `PasswordPolicyService` |
 | Dossier | `EmployeeService` (matricule, cycle), `VerifiableDataService`, `CompletenessService`, `EmployeeDocumentService` |
 | Cartes | `NfcCardService`, `CardLoginService`, `ActionSignatureService`, `BadgeVerificationService` |
 | Temps | `WorkScheduleService`, `ClockingService`, `TimeBasedCode`, `AttendanceComputationService`, `OvertimeService` |
 | Congés | `LeaveService` (solde calculé à la volée), `HolidayService` |
-| Contrats et courriers | `ClauseLibraryService`, `ContractService`, `MergeFieldResolver`, `DocumentRenderService`, `LetterCampaignService` |
-| Paie | `PayrollParameterService` (versions), `PayrollEngine`, `PayrollPeriodService`, `PayslipService`, `AdvanceLoanService`, `BankTransferExportService` |
+| Contrats et courriers | `ClauseLibraryService`, `ContractService`, `MergeFieldResolver`, `DocumentRenderer`, `LetterCampaignService` |
+| Paie | `PayrollParameterService` (versions), `PayrollEngine`, `PayrollPeriodService`, `PayslipService`, `AdvanceLoanService`, `PaymentRecordService`, `PayrollReportService` |
 | Modules | `PayrollSimulationService`, `CompensationModelService` ; `HrEventService`, `WorkflowService`, `FormRequestService` ; `EvaluationService`, `SkillService`, `JobyflowImportService` ; `DeclarationService`, `AccountingExportService` ; `DashboardWidgetService`, `ReportingService`, `CustomReportService`, `DataAccessService` |
-| Transverses | `NotificationCenterService`, `AnnouncementService`, `ActivityLogger`, `HelpCenterService`, `CompanyArchiveService` |
+| Transverses | `NotificationCenterService`, `AnnouncementService`, `ActivityLogger`, `HelpCenterService` |
 
 ### 11.2 Règles des cycles de vie **[OBLIGATOIRE]**
 
@@ -391,8 +394,8 @@ Les données du dossier saisies par l'employé (état civil, coordonnées, pièc
 ### 12.1 QR dynamique (F-ORG-03, F-TPS-02)
 
 - Chaque borne possède **sa propre clé** (`kiosks.secret`, 256 bits) reçue à l'appairage et conservée dans le Keystore de l'appareil ; côté serveur, elle est chiffrée avec la DEK de l'entreprise.
-- Le code est un **code temporel signé** (principe TOTP, RFC 6238) : `code = HMAC-SHA256(kiosk_secret, step)` tronqué, avec `step = floor(epoch / 30 s)`.
-- Le QR encode : `fluxyrh://clock?k={kiosk_id}&s={step}&c={code}`. Il est régénéré à chaque pas de 30 s, sans réseau.
+- Le code est un **code temporel signé** (principe TOTP, RFC 6238) : `code = HMAC-SHA256(kiosk_secret, step)` tronqué, avec `step = floor(epoch / pas)`, pas réglé par l'entreprise (30 s par défaut).
+- Le QR encode : `fluxyrh://clock?k={kiosk_id}&s={step}&c={code}`. Il est régénéré à chaque pas, sans réseau.
 - Vérification serveur (`TimeBasedCode::verify`) : recalcul du HMAC pour `step` ; en ligne, tolérance de ±1 pas autour de l'heure serveur ; hors ligne, voir 12.4.
 - **Anti-rejeu** : unicité `(employé, borne, step)` ; un même code ne vaut qu'un pointage par employé.
 
@@ -400,16 +403,20 @@ Les données du dossier saisies par l'employé (état civil, coordonnées, pièc
 
 | Parcours | Étapes | Preuves enregistrées |
 |---|---|---|
-| **Téléphone de l'employé** (app Entreprise) | Scan du QR de la borne → lecture de **sa** carte NFC sur son téléphone → envoi | Code QR (borne, pas), identifiant de carte, identifiant de l'appareil, horodatages |
+| **Téléphone de l'employé** (app Entreprise, Android ou iPhone) | Scan du QR de la borne → lecture de **sa** carte NFC sur son téléphone → envoi | Code QR (borne, pas), identifiant de carte, identifiant de l'appareil, horodatages |
 | **Borne** (app Borne) | L'employé pose sa carte sur la borne ; la borne connaît son propre code courant | Borne, pas, identifiant de carte |
 
 Dans les deux cas, la carte doit être `Active` et appartenir à l'employé ; dans le parcours téléphone, l'appareil doit être enregistré au nom de l'employé.
 
-**Sens du pointage** : `Entrée` ou `Sortie` est déduit automatiquement (alternance sur la journée, selon le dernier pointage connu de l'appareil ou du serveur). L'écran de confirmation propose « Inverser » pendant **10 s** ; c'est la seule modification permise d'un pointage, tracée dans `direction_inverted_at` et journalisée. Au-delà, seule la correction motivée du manager s'applique (F-TPS-05).
+**Sens du pointage** : `Entrée` ou `Sortie` est déduit automatiquement (alternance sur la journée, selon le dernier pointage connu de l'appareil ou du serveur). L'écran de confirmation propose « Inverser » pendant une **durée réglée par l'entreprise** (`clocking_settings.direction_inversion_seconds`, transmise aux apps et aux bornes) ; c'est la seule modification permise d'un pointage, tracée dans `direction_inverted_at` et journalisée. Au-delà, seule la correction motivée du manager s'applique (F-TPS-05), dans le délai réglé par l'entreprise.
+
+**Journée de rattachement** : un pointage appartient à la journée planifiée dont la fenêtre le contient (de X minutes avant le début prévu à Y minutes après la fin prévue, réglés par l'entreprise, dans le fuseau du site) ; une journée qui passe minuit porte la mention « travail de nuit ».
+
+**Pointage de secours** (F-TPS-08) : sur la borne, « Je n'ai pas ma carte » → matricule → photo prise par la borne → pointage `a_valider`, compté seulement après la validation du manager ; nombre maximal par employé et par mois réglé par l'entreprise.
 
 ### 12.3 Calculs
 
-`AttendanceComputationService` rattache chaque pointage au planning applicable (employé > site > structure) et calcule heures travaillées, retard, départ anticipé, absence ; les heures au-delà du planning sont **proposées** comme heures supplémentaires (F-TPS-06), selon les règles paramétrées par l'entreprise.
+`AttendanceComputationService` rattache chaque pointage au planning applicable (employé > site > structure) et calcule heures travaillées, retard, départ anticipé, demi-journée (activation et seuils réglés par l'entreprise) et absence. **Les heures supplémentaires ne sont jamais déduites automatiquement** : le temps au-delà du planning n'est compté que pour une heure sup **établie à l'avance par le manager** (F-TPS-06) ; le système calcule alors les minutes réellement faites, dans la limite de ce qui a été établi, découpées selon les règles de l'entreprise, puis le RH valide.
 
 ### 12.4 Hors ligne (F-TPS-03, F-ORG-06)
 
@@ -425,7 +432,7 @@ Une **application Borne unique** (une seule fiche store), qui s'appaire à n'imp
 **Appairage sécurisé** :
 
 1. L'admin entreprise crée la borne dans l'écran « Bornes » (nom, site) ; le serveur génère un **jeton d'appairage** à usage unique, valable **10 minutes**, affiché en QR. Il contient l'URL de l'entreprise (`https://{slug}.fluxyrh.app`), l'identifiant de la borne et le jeton.
-2. La borne neuve génère localement une **paire de clés** (Ed25519 ou ECDSA P-256) dans le Keystore Android (non exportable, matérielle si disponible) et scanne le QR.
+2. La borne neuve génère localement **deux paires de clés** dans le Keystore Android (non exportables, matérielles si disponible) : ECDSA P-256 pour signer ses requêtes, RSA-OAEP 2048 pour recevoir sa clé HMAC ; puis elle scanne le QR.
 3. La borne envoie en **HTTPS uniquement** (certificat épinglé sur `*.fluxyrh.app`) : jeton d'appairage, clé publique, empreinte de l'appareil (modèle, version Android, identifiant d'installation).
 4. Le serveur vérifie le jeton (non expiré, non utilisé, borne `En attente`), enregistre la clé publique, puis renvoie le jeton Sanctum `kiosk:{id}` et la **clé HMAC de la borne, chiffrée pour elle seule** (chiffrement hybride avec la clé publique de la borne). Le jeton d'appairage est consommé.
 5. La borne passe `Active` ; l'admin voit l'appareil appairé et peut le renommer.
@@ -435,7 +442,9 @@ Une **application Borne unique** (une seule fiche store), qui s'appaire à n'imp
 - Chaque requête de la borne est authentifiée par le jeton Sanctum **et signée** par sa clé privée (en-tête de signature sur le corps et l'horodatage) : un jeton volé sans l'appareil est inutilisable.
 - Les pointages en file locale sont chiffrés (MMKV, clé dans le Keystore) et signés par la borne.
 - **Battement de cœur** toutes les 5 minutes quand le réseau est disponible : version de l'app, niveau de batterie, nombre de pointages en attente, dérive d'horloge mesurée. Une borne silencieuse depuis un délai paramétrable déclenche une alerte à l'admin.
-- Mode kiosque Android (`startLockTask`, application de lancement), plein écran, écran toujours allumé, sortie du mode kiosque protégée par un code admin, aucune session personnelle.
+- **Configuration** (`/kiosk/config`) : entreprise, site, fuseau, pas du code, durée d'inversion, empreinte du code de sortie, son, et liste des cartes actives des employés autorisés sur le site (empreinte, nom, photo), gardée chiffrée pour confirmer un pointage hors ligne ; le serveur reste seul juge à la réception.
+- **Renouvellement de la clé HMAC** : la nouvelle clé est livrée au signal de vie suivant, chiffrée pour la borne ; l'ancienne reste acceptée pour les pointages capturés avant, dans la fenêtre hors ligne.
+- Mode kiosque Android : l'app est installée comme **propriétaire de l'appareil** (Device Owner, commande `adb` de la procédure d'installation) avec `startLockTask`, application de lancement, plein écran, écran toujours allumé, redémarrage automatique ; sortie protégée par un **code choisi par l'admin pour chaque borne** (stocké haché) ; aucune session personnelle. Version Android minimale : la plus basse qui prend en charge toutes ces fonctions.
 
 **Cycle de vie** : `En attente d'appairage` → `Active` → `Suspendue` (temporaire) → `Révoquée`. La révocation invalide le jeton, la clé publique et la clé HMAC de cette borne ; les autres bornes du site, qui ont chacune leur propre clé, ne sont pas affectées. Les pointages signés par une borne révoquée et reçus après sa révocation sont refusés, sauf s'ils ont été capturés avant la révocation et sont validés par le manager.
 
@@ -446,11 +455,13 @@ Une **application Borne unique** (une seule fiche store), qui s'appaire à n'imp
 ## 13. Cartes NFC et signature d'actions
 
 - **Support** : NFC Forum Type 2 (NTAG213/215/216). **Contenu** : un enregistrement NDEF URI `https://{slug}.fluxyrh.app/badge/{identifiant_opaque}` ; aucune donnée métier sur la puce.
-- **Encodage** dans l'app Console : réservation de l'identifiant → écriture + relecture → confirmation (`Encodée`) → verrouillage en lecture seule proposé.
-- **Page publique** `/badge/{identifiant}` (F-NFC-03) : `En poste` / `Plus en poste` / `Inconnue`, nom, photo, poste ; `noindex`, 20/min, journalisée.
+- **Identifiant** : 128 bits aléatoires, générés à la réservation et renvoyés une seule fois à la Console ; en base, seule son **empreinte** (`identifier_hash`, HMAC-SHA256 avec une clé dérivée de la clé de l'entreprise) est stockée, pour retrouver la carte.
+- **Encodage** dans l'app Console : réservation → écriture + relecture → confirmation (`Encodée`) → **verrouillage** de la puce, définitif, avec confirmation.
+- **Page publique** `/badge/{identifiant}` (F-NFC-03) : `En poste` / `Plus en poste` (employé sorti) / `Inconnue` (carte inconnue ou désactivée), nom, photo, poste ; `noindex`, 20/min, journalisée.
 - **Accès rapide** (F-NFC-04) : l'API renvoie le dossier filtré par `PermissionService` et `FieldAccess` de la personne qui scanne.
-- **Connexion carte + PIN** (F-NFC-05) : appareil enregistré, PIN haché, 5 essais, révocation à la désactivation de la carte.
-- **Signature d'actions** (F-NFC-06) : `ActionSignatureService::sign(action, subject, card, device)` enregistre une `action_signature` (signataire, carte, appareil, horodatage serveur, **empreinte SHA-256 du document signé**). Le PDF d'un contrat signé est figé (fichier immuable + empreinte) ; toute modification ultérieure passe par un avenant.
+- **PIN** : un seul PIN par carte (`nfc_cards.pin_hash`), choisi à l'activation, sur le téléphone ou la borne.
+- **Connexion carte + PIN** (F-NFC-05) : activée par chaque utilisateur pour ses appareils ; appareil enregistré, 5 essais, révocation à la désactivation de la carte.
+- **Signature d'actions** (F-NFC-06) : `ActionSignatureService::sign(action, subject, method, proof, documentHash)` enregistre une `action_signature` (signataire, **moyen**, carte ou appareil ou borne, horodatage serveur, **empreinte SHA-256 du document signé**). Moyens : `carte` (app ou borne), `mot_de_passe` (web), `appareil` (code ou biométrie du téléphone enregistré). Le **pointage exige toujours la carte**. Le PDF d'un contrat signé est figé (fichier immuable + empreinte) ; toute modification ultérieure passe par un avenant.
 
 ---
 
@@ -480,17 +491,18 @@ Une **application Borne unique** (une seule fiche store), qui s'appaire à n'imp
 
 ### 14.4 Tests de paie **[OBLIGATOIRE]**
 
-Jeux de cas chiffrés de référence (« bulletins dorés ») couvrant : plafond CNPS, chaque tranche d'IRPP, heures sup, absences, avance en remboursement, entrée et sortie en cours de mois, temps partiel. Toute modification du moteur doit les faire passer.
+Jeux de cas chiffrés de référence (« bulletins dorés »), calculés sur un paramétrage de test (décision 0002), couvrant : plafond d'une cotisation, chaque tranche d'un impôt par barème, heures sup, absences, avance en remboursement, entrée et sortie en cours de mois, temps partiel. Toute modification du moteur doit les faire passer.
 
 ---
 
-## 15. Contrats et courriers : clauses, blocs, champs de fusion
+## 15. Contrats et courriers : blocs, champs de fusion
 
-- **Bibliothèque de clauses types** (F-CTR-01, F-PRO-03) : clause = titre + texte riche + champs de fusion, versionnée, traduite ; catégorie (objet, durée, période d'essai, rémunération, confidentialité…).
-- **Modèle de contrat** = liste ordonnée de clauses, avec conditions d'inclusion par type d'employé. À la rédaction d'un contrat, le RH part d'un modèle, réordonne, retire ou **ajoute des blocs libres** (texte riche). Le contrat stocke une **copie** du texte de chaque bloc (pas une référence vivante à la clause), avec ses champs `{{…}}` non résolus ; les valeurs des champs sont **figées** au passage `À signer` dans `contract_merge_values` (sensibles chiffrées) et résolues à l'affichage selon les droits du lecteur. Le PDF signé, lui, contient les valeurs.
-- **Champs de fusion** `{{employe.nom}}`, `{{contrat.salaire_base}}`, `{{entreprise.rccm}}`… : liste fermée déclarée dans `MergeFieldRegistry` ; `MergeFieldResolver` applique `FieldAccess` (un champ sensible est refusé à l'enregistrement du modèle si l'auteur n'y a pas droit, et n'est jamais résolu pour un lecteur non autorisé).
-- Éditeur web : texte riche limité (gras, italique, listes, titres, tableaux simples) avec insertion des champs ; HTML assaini côté serveur (liste blanche de balises).
-- **Rendu** : HTML → dompdf, en-tête de l'entreprise, arabe par ar-php. Courriers en masse : un job par lot, un PDF par destinataire, envoi e-mail et dépôt dans l'espace de l'employé.
+- **Bibliothèque de blocs** (F-CTR-01, F-PRO-03) : bloc = titre + texte riche + champs de fusion, **dans la langue officielle de l'entreprise**, versionné (brouillon modifiable, version publiée figée) ; catégorie ; **règles de proposition** (nature de contrat, type d'employé, inséré d'office ou seulement proposé). Aucun bloc n'est livré par défaut.
+- **Rédaction** : à partir de la nature du contrat et du type d'employé, les blocs présélectionnés sont insérés et les autres proposés ; le RH réordonne, retire, ajoute n'importe quel bloc ou un **bloc libre** (qu'il peut enregistrer dans la bibliothèque). Le contrat stocke une **copie** du texte de chaque bloc, avec ses champs `{{…}}` non résolus ; les valeurs sont **figées** à l'envoi pour signature dans `contract_merge_values` (sensibles chiffrées) et résolues à l'affichage selon les droits du lecteur. Le PDF signé, lui, contient les valeurs.
+- **Signature** : le RH choisit les signataires et leur ordre (l'employé et un ou plusieurs signataires de l'entreprise) ; le PDF à signer est figé à l'envoi ; le contrat reste modifiable en `À signer`, chaque modification créant une nouvelle version du PDF à signer (`contract_signing_versions`) et annulant les signatures déjà faites ; copies papier imprimées pour la signature manuscrite **et** signature de chacun dans le système (§13) ; à la dernière signature, PDF final figé avec le bloc des signataires.
+- **Champs de fusion** `{{employe.nom}}`, `{{contrat.salaire_base}}`, `{{entreprise.raison_sociale}}`… : liste fermée déclarée dans `MergeFieldRegistry` ; `MergeFieldResolver` applique `FieldAccess` (un champ sensible est refusé à l'enregistrement d'un texte si l'auteur n'y a pas droit, et n'est jamais résolu pour un lecteur non autorisé).
+- Éditeur web : **Tiptap** dans un composant Livewire maison (pas de licence Flux Pro), texte riche limité (gras, italique, listes, titres, tableaux simples) avec insertion des champs ; HTML assaini côté serveur (`symfony/html-sanitizer`, liste blanche de balises).
+- **Rendu** : HTML → dompdf par `DocumentRenderer`, en-tête de l'entreprise, arabe par ar-php. Courriers en masse : un job par lot, un PDF par destinataire, **lien** envoyé par e-mail (jamais le PDF en pièce jointe), dépôt dans l'espace de l'employé ; signature de la direction avant l'envoi quand le modèle l'exige.
 
 **Charte des documents (F-IDN, module Identité)**
 
@@ -512,7 +524,7 @@ Jeux de cas chiffrés de référence (« bulletins dorés ») couvrant : plafond
 
 - **FluxyRH tire** : le RH lance « Importer depuis Jobyflow », choisit les candidats retenus, puis complète l'affectation avant l'invitation.
 - Connexion par entreprise : URL et clé d'API Jobyflow saisies par l'admin, chiffrées avec la DEK.
-- `JobyflowClient` (HTTP, délai, nouvelles tentatives) ; `JobyflowImportService` crée des **invitations en brouillon** pré-remplies ; les données importées entrent comme versions `À vérifier` après acceptation (P2).
+- `JobyflowClient` (HTTP, délai, nouvelles tentatives) ; `JobyflowImportService` crée des **invitations en brouillon** pré-remplies ; les données importées sont proposées en brouillon dans l'assistant de complétion, et c'est l'employé qui les soumet (P1, P2).
 - **Jobyflow n'est pas encore développé** : c'est FluxyRH qui fixe le contrat d'interface que Jobyflow devra exposer. Contrat attendu (v1) :
   - authentification : clé d'API par entreprise, en-tête `Authorization: Bearer` ;
   - `GET /api/v1/hired-candidates?since={date}&status=retained` : liste paginée des candidats retenus ;
@@ -522,15 +534,14 @@ Jeux de cas chiffrés de référence (« bulletins dorés ») couvrant : plafond
 
 ### 16.2 Export comptable (F-CNF-04)
 
-- Écritures générées depuis une période **clôturée** : correspondance rubrique → compte (plan SYSCOHADA paramétrable), journal, sens, regroupement par compte ou par employé.
-- Formats : **générique** (CSV et XLSX : journal, date, compte, libellé, débit, crédit, référence) et **Sage**. Le produit Sage exact et son format d'import sont arrêtés pendant le développement de la phase Conformité ; l'export est conçu comme un **adaptateur** (`AccountingExportFormat`) pour ajouter un format sans toucher à la génération des écritures. Chaque export est journalisé et rejouable.
+- Écritures générées depuis une période **clôturée** : correspondance rubrique → compte (plan comptable saisi ou importé par l'entreprise, SYSCOHADA ou autre), journal, sens, regroupement par compte ou par employé.
+- Formats : **générique** (CSV et XLSX : journal, date, compte, libellé, débit, crédit, référence) et **Sage**. Produit retenu : **Sage 100 Comptabilité** ; l'export est conçu comme un **adaptateur** (`AccountingExportFormat`) pour ajouter un format sans toucher à la génération des écritures. Chaque export est journalisé et rejouable.
 
-### 16.3 Ordres de virement (F-PAY-08)
+### 16.3 Paiements (F-PAY-08)
 
-- **Toutes les banques** : la liste des banques et leurs **formats de fichier de virement sont paramétrables** par l'entreprise (gestionnaire de paie) : type de fichier (CSV, TXT à largeur fixe, XLSX), séparateur, encodage, ligne d'en-tête et de total, colonnes ordonnées choisies parmi une liste fermée (matricule, nom, banque, code guichet, numéro de compte, clé RIB, montant, libellé, date de valeur), format des montants et des dates.
-- Un modèle « générique » est fourni ; une entreprise peut dupliquer et adapter un format, ou en créer un par banque.
-- Le fichier est découpé **par banque** de l'employé ; seuls les employés aux coordonnées bancaires `Vérifiées` y figurent (F-EMP-09) ; les autres apparaissent dans un état « à payer hors virement ».
-- Génération réservée aux rôles autorisés sur la catégorie `bancaire` ; chaque fichier est journalisé avec son empreinte.
+- Les paiements (virements, espèces, mobile money) se font **hors de FluxyRH** : aucun ordre ni fichier de virement n'est produit.
+- Le gestionnaire de paie enregistre le résultat de chaque paiement (`paye` / `echec`, moyen, date, référence), un par un ou en groupe ; l'écran lui montre le net et le compte principal vérifié de chaque employé, et signale les dossiers incomplets et les comptes non vérifiés.
+- L'export de la liste des paiements est réservé aux rôles autorisés sur la catégorie `bancaire` et journalisé.
 
 ### 16.4 Accès externe aux données (F-PIL-04)
 
@@ -552,15 +563,15 @@ Jeux de cas chiffrés de référence (« bulletins dorés ») couvrant : plafond
 | `/payroll/*` | rôle `gestionnaire_paie` + permission | vérification bancaire, contrôle de période, avances |
 | `/direction/*` | rôle `direction` | tableau de bord, approbations (paie, contrats, avances) |
 | `/admin/*` | rôle `admin_entreprise` | utilisateurs, invitations, bornes, cartes, journal, connectés |
-| `/kiosk/*` | borne (`kiosk:{id}`) | configuration, envoi de pointages, état |
+| `/kiosk/*` | borne (`kiosk:{id}`) | appairage, configuration (dont la liste des cartes du site), envoi de pointages, pointages de secours, activation de carte, signal de vie |
 | `/badge-link/{identifier}` | dans l'espace de chaque rôle | carte qui ouvre l'app |
 | `/data/*` | jeton d'intégration | accès externe (module Pilotage) |
-| `/platform/*` | admin plateforme (Console) | entreprises, file des cartes, encodage |
+| `/platform/*` | admin plateforme (Console) | indicateurs, entreprises, factures, journal, file des cartes, encodage |
 
 ### 17.2 Contrat typé et versions **[OBLIGATOIRE]**
 
 - Scramble décrit l'API ; `php artisan api:contract` écrit le `openapi.json` de chaque app ; `npm run api:sync` génère les types ; un test échoue si le contrat n'est pas à jour.
-- On ne casse jamais `v1`. `X-App-Version` obligatoire (426 sous le minimum de chaque app). Langue de réponse par `Accept-Language`.
+- On ne casse jamais `v1`. `X-App-Id` et `X-App-Version` obligatoires (426 sous le minimum de chaque app, défini en configuration). Langue de réponse par `Accept-Language`.
 
 ---
 
@@ -571,6 +582,7 @@ Jeux de cas chiffrés de référence (« bulletins dorés ») couvrant : plafond
 | | Entreprise | Borne | Console |
 |---|---|---|---|
 | Public | Les 6 rôles de l'entreprise | Appareil partagé d'un site | Admins RIYADA ONE |
+| Plateformes | Android et iOS | Android | Android |
 | Builds | Un flavor par entreprise (marque blanche) | Une seule app, appairée de façon sécurisée à une entreprise et un site (§12.5) | Une seule app |
 | API | `https://{slug}.fluxyrh.app/api/v1` | idem, espace `/kiosk` | `https://platform.fluxyrh.app/api/v1/platform` |
 | NFC | Lecture (pointage, accès rapide, signature) | Lecture | Écriture (encodage) |
@@ -580,14 +592,15 @@ Jeux de cas chiffrés de référence (« bulletins dorés ») couvrant : plafond
 
 - Arborescence `src/app`, `src/shared`, `src/features/<fonctionnalité>`, imports par alias, frontières vérifiées par ESLint (conventions UnivPlus).
 - TanStack Query branché sur NetInfo ; cache persistant **chiffré** (MMKV AES-256, clé dans le Keystore), durée de vie 7 jours, effacé à la déconnexion.
-- **Mutations hors ligne** (app Entreprise) : pointage, demande de congé, saisie d'une donnée du dossier ; chacune porte un UUID client (création idempotente) et `captured_at` / `sent_at` ; refus motivés affichés dans une file visible.
+- **Mutations hors ligne** (app Entreprise) : pointage, demande de congé, saisie d'une donnée du dossier, demande d'avance, demande de formulaire ; chacune porte un UUID client (création idempotente) et `captured_at` / `sent_at` ; refus motivés affichés dans une file visible.
 - Pièces justificatives : photo ou fichier compressé, mis en file avec la saisie.
 - Verrouillage de l'app par biométrie ou code du téléphone ; version minimale imposée par le serveur.
 
-### 18.3 Natif Android
+### 18.3 Natif Android et iOS
 
 - Filtres d'intention `NDEF_DISCOVERED` et `VIEW` (`autoVerify`) sur l'URI de badge ; `/.well-known/assetlinks.json` servi par chaque entreprise.
-- Borne : application de lancement + `startLockTask`, écran toujours allumé, redémarrage automatique.
+- Borne : application propriétaire de l'appareil (Device Owner) + `startLockTask`, écran toujours allumé, redémarrage automatique.
+- iOS (app Entreprise) : Core NFC (lecture NDEF, iPhone 7 et plus récents) ; Universal Links (`/.well-known/apple-app-site-association` servi par chaque entreprise) ; Face ID ; builds sur un Mac ou un service de build en ligne ; publication depuis le compte Apple Developer de RIYADA ONE.
 - Signature release : clés hors dépôt ; build Windows depuis un chemin court (limite des 260 caractères).
 
 ### 18.4 Qualité mobile
@@ -601,7 +614,7 @@ Jeux de cas chiffrés de référence (« bulletins dorés ») couvrant : plafond
 | Canal | Mise en œuvre |
 |---|---|
 | In-app | `NotificationCenterService::send()` : point d'entrée unique (cloche web, écran mobile) |
-| Push | Job `SendPushNotification` après commit ; API FCM HTTP v1 sans SDK ; `push_devices` liés au jeton Sanctum ; un projet Firebase par flavor |
+| Push | Job `SendPushNotification` après commit ; API FCM HTTP v1 sans SDK ; `push_devices` liés au jeton Sanctum ; un projet Firebase par app d'entreprise (Android, et iOS via APNs), compte de service déposé chiffré sur la fiche de l'entreprise |
 | E-mail | Notifications Laravel en file ; SMTP Google Workspace depuis `no-reply@fluxyrh.app` (SPF, DKIM, DMARC) ; langue officielle de l'entreprise |
 | Relances | Commande planifiée quotidienne : dossiers incomplets, données à vérifier, contrats à échéance, pièces expirées |
 
@@ -615,8 +628,9 @@ File : `QUEUE_CONNECTION=database`, worker systemd `fluxyrh-queue`. Cache et ses
 
 - **Langues** fr, en, ar ; fichiers PHP par module `lang/{locale}/{module}.php`, notation `__('module.key')` ; les trois langues livrées ensemble ; `dir="rtl"` pour l'arabe.
 - **Langue officielle** de l'entreprise pour les documents, e-mails et push ; journal stocké en trois langues.
-- **Devise** : `companies.currency_code` (ISO 4217, XAF par défaut), verrouillée dès la première rubrique de paie ; colonnes `amount*` décimales sans suffixe ; `App\Support\Money` pour tout affichage (montant en lettres sur le bulletin) ; aucune conversion. Les prix de la plateforme restent en FCFA.
-- **Fuseau** : plateforme en UTC ; `companies.timezone` (Africa/Ndjamena par défaut) appliqué dans `connectTo()` ; chaque site peut avoir son fuseau pour le calcul des pointages.
+- **Devise** : `companies.currency_code` (ISO 4217, choisie à la création, sans valeur par défaut), verrouillée dès la première rubrique de paie ; colonnes `amount*` décimales sans suffixe ; `App\Support\Money` pour tout affichage (montant en lettres sur le bulletin) ; aucune conversion. Les prix de la plateforme restent en FCFA.
+- **Fuseau** : plateforme en UTC ; `companies.timezone` (choisi à la création, sans valeur par défaut) appliqué dans `connectTo()` ; chaque site peut avoir son fuseau pour le calcul des pointages.
+- **Données créées par le système** (types par défaut, listes de départ, modèles du module Processus RH) : libellées dans la langue officielle de l'entreprise, à partir des fichiers de langue (décision 0002).
 - `Date::use(CarbonImmutable::class)` : toujours réaffecter.
 
 ---
@@ -645,7 +659,7 @@ File : `QUEUE_CONNECTION=database`, worker systemd `fluxyrh-queue`. Cache et ses
 | Formules de paie | Évaluateur restreint, aucune exécution de code |
 | Contenu riche | HTML assaini (liste blanche) |
 | Pages publiques | Limites de débit, `noindex`, aucune donnée sensible |
-| Fichiers | Disque privé, téléchargements autorisés seulement, liens d'archive signés et expirants |
+| Fichiers | Disque privé, téléchargements autorisés seulement |
 | Accès serveur | SSH via Cloudflare Access uniquement |
 | Secrets | `.env`, clé maître, clés Firebase, keystores, SMTP, clés Jobyflow : hors dépôt |
 
@@ -689,26 +703,27 @@ Détail des tables : **BACKEND SCHEMA**.
 |---|---|
 | Serveur | Serveur Debian **dédié** à FluxyRH ; dimensionnement (processeur, mémoire, disque) et stockage externe des sauvegardes arrêtés **en fin de développement**, à partir des mesures réelles (taille d'une base type, durée de calcul de paie, volume de fichiers) |
 | Pile | Nginx, PHP 8.5-FPM, MySQL 8, `fluxyrh-queue.service`, cron |
+| Hébergeur | Serveur dédié en Europe (Hetzner ou OVHcloud), choix modifiable au moment de la commande |
 | Exposition | Cloudflare : DNS joker `*.fluxyrh.app`, tunnel, Access pour SSH |
 | Scripts | `deploy/debian/` : `install.sh`, `deploy.sh`, `migrate-tenants.php`, `backup.sh`, `restore.sh` |
 
-**`deploy.sh`** : maintenance → `git pull --ff-only` → `composer install --no-dev` → `npm ci && npm run build` → migrations générales → seeders des plans → `migrate-tenants.php` → `storage:link`, `optimize` → rechargement PHP-FPM et worker.
+**`deploy.sh`** : maintenance → `git pull --ff-only` → `composer install --no-dev` → `npm ci && npm run build` → migrations générales → seeders des plans → `migrate-tenants.php` → synchronisation des articles d'aide → `storage:link`, `optimize` → rechargement PHP-FPM et worker.
 
 ### 25.3 Sauvegardes (F-PLT-06, NF-09)
 
-- **Quotidienne** : `mysqldump --single-transaction` de la base générale et de chaque base d'entreprise + fichiers privés ; conservée **30 jours**.
+- **Quotidienne** : `mysqldump --single-transaction` de la base générale et de chaque base d'entreprise + fichiers privés, chiffrée ; conservée **30 jours**.
 - **Mensuelle** : conservée **12 mois**.
-- Copie chiffrée sur un **stockage externe** au serveur ; clé maître (§9.3) sauvegardée séparément.
+- Copies chiffrées gardées **en local** sur le serveur **et** sur un **stockage externe** compatible S3 chez un autre fournisseur (Backblaze B2 ou Wasabi) ; clé maître sauvegardée **séparément**.
 - Test de restauration mensuel sur un environnement isolé, consigné.
-- **Archive mensuelle sur demande** de l'entreprise : job `CompanyArchiveService` qui produit un ZIP lisible (tableurs par domaine, PDF des contrats et bulletins, pièces), selon les droits du demandeur pour les données sensibles ; lien signé et expirant ; demande journalisée. Archive complète à la résiliation.
+- **Archives demandées par une entreprise** (mensuelles ou à la résiliation) : préparées **hors système** par RIYADA ONE à partir des sauvegardes, selon une procédure écrite (`07-exploitation/`) ; aucune fonction d'archive dans l'application.
 
 ### 25.4 Supervision et objectifs
 
-Disponibilité visée 99,5 % / mois ; supervision de la disponibilité HTTP, du worker, de l'espace disque et de la réussite des sauvegardes ; alertes par e-mail.
+Disponibilité visée 99,5 % / mois ; supervision de la disponibilité HTTP (UptimeRobot), du worker, de l'espace disque et de la réussite des sauvegardes et tâches planifiées (Healthchecks.io) ; alertes par e-mail.
 
 ### 25.5 Applications mobiles
 
-Un build signé par entreprise (flavor) pour l'app Entreprise, un `google-services.json` par flavor ; l'export de configuration de flavor depuis la fiche « Application mobile » de la plateforme (F-PLT-08) ; une app Borne et une app Console uniques.
+Une app par entreprise (Android et iOS) avec ses fichiers Firebase, publiée depuis les comptes Google Play et Apple Developer de RIYADA ONE ; l'export de configuration de flavor depuis la fiche « Application mobile » de la plateforme (F-PLT-08) ; une app Borne et une app Console uniques.
 
 ---
 
@@ -735,17 +750,23 @@ Un build signé par entreprise (flavor) pour l'app Entreprise, un `google-servic
 
 ## 27. Questions techniques ouvertes
 
-Aucune question bloquante. Décisions du 2026-10-27 :
+Aucune question bloquante. Décisions des 2026-10-27 et 2026-10-28 :
 
 | Sujet | Décision | Reste à faire |
 |---|---|---|
-| App Borne | App unique, appairage sécurisé et chiffré, écran « Bornes » (§12.5) | — |
-| Sage | Format Sage ajouté comme adaptateur (§16.2) | Choisir le produit Sage en phase Conformité |
-| Jobyflow | FluxyRH fixe le contrat d'interface ; faux fournisseur en attendant (§16.1) | Transmettre le contrat à l'équipe Jobyflow |
-| Serveur | Dédié, dimensionné en fin de développement (§25.2) | Mesures de charge |
-| Virements | Toutes les banques, formats paramétrables (§16.3) | — |
-| Code temporel | 30 s (§12.1) | Vérifier la dérive des horloges lors de la recette terrain |
-| Charte graphique | Documents générés seulement (PDF, e-mails, carte) ; socle neutre ; module `identite` hors pack : 12 modèles, palette fermée, cachet, signature, filigrane (§15) | Dessiner les 12 modèles (UX/UI §13.5) |
+| App Borne | App unique Android, propriétaire de l'appareil, appairage sécurisé, code de sortie par borne (§12.5) | Version Android minimale vérifiée au démarrage de B00 |
+| Clés de la borne | ECDSA P-256 pour signer, RSA-OAEP 2048 pour recevoir la clé HMAC (§12.5) | — |
+| Sage | Sage 100 Comptabilité, derrière un adaptateur (§16.2) | Vérifier le format d'import avec l'expert-comptable |
+| Jobyflow | FluxyRH fixe le contrat d'interface ; faux fournisseur en attendant (§16.1) | Transmettre le contrat à l'équipe Jobyflow (W15) |
+| Serveur | Dédié en Europe, dimensionné en fin de développement (§25.2) | Mesures de charge |
+| Paiements | Hors système, enregistrés dans FluxyRH (§16.3) | — |
+| Archives | Hors système (§25.3) | Procédure écrite (MEP) |
+| Code temporel | 30 s par défaut, réglable (§12.1) | Vérifier la dérive des horloges lors de la recette terrain |
+| Charte graphique | Documents générés seulement ; socle neutre ; module `identite` hors pack (§15) | Maquettes des 12 modèles et des 20 designs de carte, proposées par Claude avant W16 |
+| Éditeur de texte | Tiptap dans un composant maison (§15) | — |
+| Applications mobiles | Entreprise sur Android et iOS ; Borne et Console sur Android ; Console en test interne Google Play (§18) | Build iOS : Mac ou service en ligne, choisi au démarrage d'E00 |
+| Publication iOS | Depuis le compte Apple Developer de RIYADA ONE (§25.5) | Repli sur un compte du client en cas de refus d'Apple |
+| Signature | Avec ou sans carte pour les documents, carte obligatoire pour le pointage (§13) | — |
 
 ---
 
@@ -763,7 +784,7 @@ Aucune question bloquante. Décisions du 2026-10-27 :
 | T-08 | Aucun taux, montant ni devise codés en dur ; `Money` pour tout affichage |
 | T-09 | Champs sensibles : `FieldAccess` partout, chiffrés au repos avec la clé de l'entreprise, jamais dans une notification |
 | T-10 | Données vérifiables versionnées ; seule la version vérifiée est utilisée par la paie, les documents et les rapports |
-| T-11 | Pointage : code temporel signé + carte, anti-rejeu, correction d'horloge, fenêtre hors ligne bornée |
+| T-11 | Pointage : code temporel signé + carte, anti-rejeu, correction d'horloge, fenêtre hors ligne bornée ; pointage de secours seulement « à valider » |
 | T-11b | Bornes : appairage par jeton unique de 10 min, clé privée non exportable, requêtes signées, révocation immédiate |
 | T-12 | Paie : paramétrage versionné, formules en évaluateur restreint, calcul décimal, bulletins reproductibles, bulletins dorés à jour |
 | T-13 | Documents signés figés avec empreinte SHA-256 |
@@ -773,4 +794,4 @@ Aucune question bloquante. Décisions du 2026-10-27 :
 | T-17 | Migrations des entreprises existantes par `migrate-tenants.php`, jamais par le provisionnement |
 | T-18 | Sauvegardes quotidiennes (30 j) et mensuelles (12 mois), copie externe, restauration testée chaque mois |
 | T-19 | Pint après toute modification PHP ; `npm run check` avant toute livraison mobile |
-| T-20 | Tout document passe par `DocumentRenderer` et enregistre sa version de charte ; signature d'un directeur apposée seulement sur un document qu'il a signé par carte |
+| T-20 | Tout document passe par `DocumentRenderer` et enregistre sa version de charte ; signature d'un directeur apposée seulement sur un document qu'il a signé dans le système |

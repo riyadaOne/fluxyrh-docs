@@ -34,7 +34,7 @@ W09.2 livré.
 | Employés d'une période | Employés de cette fréquence dont une période d'emploi chevauche la période, et dont le type entre dans la paie |
 | Gel des données de temps | Après `Variables validées`, les corrections de journées, heures sup et congés touchant la période sont refusées (motif « variables validées ») ; pour les rouvrir, le RH ramène la période à `Ouverte` |
 | Retour à `Ouverte` | Non prévu par les spécifications. Proposition : le RH (ou le PAIE qui détecte une erreur) peut ramener la période à `Ouverte` tant qu'elle n'est pas `controlee` ; les bulletins calculés sont alors supprimés. BACKEND SCHEMA §6 mis à jour |
-| Variables d'événements et d'avances | Sources `evenement` (W12.1) et `avance` (W09.7) ajoutées par leurs modules ; la source `saisie` permet dès W09.3 une variable manuelle motivée |
+| Variables d'avances | Source `avance` ajoutée par W09.7 ; **pas de variable issue des événements RH** en v1 (décision de W12.1) ; la source `saisie` permet dès W09.3 une variable manuelle motivée |
 | Montants dans les variables | Les variables sont des **quantités** (jours, minutes, nombre) ; la saisie d'un montant manuel est réservée au PAIE (W09.4), pour que le RH ne manipule aucune rémunération |
 
 ## 5. Statuts traversés
@@ -107,4 +107,4 @@ W09.2 livré.
 |---|---|
 | Calcul, contrôle, montants manuels | W09.4 |
 | Ouverture automatique de la période suivante, clôture et verrouillage définitif | W09.6 |
-| Variables d'avances, d'événements | W09.7, W12.1 |
+| Variables d'avances | W09.7 |

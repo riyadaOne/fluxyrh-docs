@@ -20,6 +20,7 @@ Le manager agit sur son **équipe directe** ; son supérieur n'agit qu'en son ab
 |---|---|
 | F-TPS-05 | Correction de pointage motivée, journalisée |
 | F-TPS-06 (établissement) | Heures sup établies à l'avance par le manager |
+| F-TPS-08 (validation) | Validation ou refus des pointages de secours |
 | F-ORG-04 | Décision au manager direct |
 
 À lire : PRD §7.6 ; APPFLOW §4.6, §5.6 (fin), §5.7, §6.3 (S-33, S-34), §7 ; BACKEND SCHEMA §5.6 (`attendance_corrections`, `overtime_entries`), §6 ; UX/UI §6.1.
@@ -54,6 +55,7 @@ W06.2 livré.
 - Migration `attendance_corrections`.
 - `App\Services\Tenant\AttendanceCorrectionService::correct(day, in, out, status, reason)` : manager direct (ou délégation), jamais sa propre journée, dans le délai réglé (§4), motif obligatoire ; enregistre les valeurs avant et après, marque la journée `is_corrected`, recalcule minutes, retard et départ anticipé à partir des heures corrigées, recalcule les minutes réalisées des heures sup établies (§4) ; journal ; notification à l'employé.
 - Création d'une journée absente du calcul (oubli complet de pointage) par la même correction.
+- Pointages de secours (W06.2) : le manager les valide (la journée est recalculée) ou les refuse avec un motif, la photo affichée à côté du matricule ; même délai et même périmètre que les corrections.
 
 **Critère de fin** : une correction sur un pointage refusé (carte perdue, borne en panne) donne une journée juste ; un manager ne peut corriger ni sa journée ni celle d'une personne hors de son équipe.
 
@@ -75,7 +77,7 @@ W06.2 livré.
 
 ### W06.3.6 — Documentation et livraison
 
-- `02-reference/` : corrections, déclaration des heures sup.
+- `02-reference/` : corrections, pointages de secours, heures sup établies à l'avance.
 - Livraison dans `06-livraisons/`, ligne au `JOURNAL.md`, statut W06.3 dans la ROADMAP.
 
 ## 7. Tests attendus

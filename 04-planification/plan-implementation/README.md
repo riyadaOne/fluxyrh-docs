@@ -41,7 +41,7 @@ Identifiant d'une étape : `<préfixe><module>.<sous-fichier>.<étape>` pour un 
 | Code | Fichier | Contenu | Exigences | Dépend de |
 |---|---|---|---|---|
 | W00 | `web/00-amorcage.md` | Projet Laravel, multi-entreprise, chiffrement, journal, files, e-mails, langues, interface de base, outillage de tests | T-01 à T-08, T-16, T-17, T-19 | — |
-| W01 | `web/01-plateforme.md` | Espace plateforme : connexion, entreprises, provisionnement, abonnements, modules, factures, tableau de bord, fiche app mobile, page d'accueil publique | F-PLT-01 à 04, 07, 08 | W00 |
+| W01 | `web/01-plateforme.md` | Espace plateforme : connexion, entreprises, provisionnement, abonnements, modules, factures, tableau de bord, fiche app mobile, page d'accueil publique | F-PLT-01 à 04, 07 à 09 | W00 |
 | W02 | `web/02-administration-acces.md` | Connexion entreprise, invitation et rattachement, matrice des droits, champs sensibles, mot de passe, 2FA, connectés, configuration, journal, API d'authentification | F-ADM-01 à 09, F-COM-02 | W01 |
 | W03 | `web/03-organisation.md` | Structure, postes, sites, organigramme, bornes (côté serveur), rendu PDF neutre | F-ORG-01 à 03, 05 à 07, F-IDN-01 | W02 |
 | W04 | `web/04-dossier-employe/` | Dossier authentique | F-EMP-01 à 07, 09, 10, F-COM-01 (cloche) | W03 |
@@ -51,8 +51,8 @@ Identifiant d'une étape : `<préfixe><module>.<sous-fichier>.<étape>` pour un 
 | W05 | `web/05-cartes-nfc.md` | Cycle de la carte (côté serveur), file d'encodage, badge public, connexion carte + PIN, signature d'actions, design neutre, cartes de test | F-NFC-01 à 07, F-PLT-05 | W04 |
 | W06 | `web/06-temps-pointage/` | Temps de travail | F-TPS-01 à 07 | W05 |
 | W06.1 | `01-parametrage.md` | ADM / RH : plannings, jours fériés, règles d'heures sup, réglages du pointage | F-TPS-01, 06 | |
-| W06.2 | `02-pointage.md` | EMP / SYS : code temporel, API de pointage (téléphone et borne), hors ligne, calculs journaliers, heures sup réalisées | F-TPS-02, 03, 04, 06 | W06.1 |
-| W06.3 | `03-manager.md` | MGR : présences de l'équipe, corrections, heures sup établies à l'avance | F-TPS-05, 06 | W06.2 |
+| W06.2 | `02-pointage.md` | EMP / SYS : code temporel, API de pointage (téléphone et borne), hors ligne, calculs journaliers, heures sup réalisées | F-TPS-02, 03, 04, 06, 08 | W06.1 |
+| W06.3 | `03-manager.md` | MGR : présences de l'équipe, corrections, heures sup établies à l'avance | F-TPS-05, 06, 08 | W06.2 |
 | W06.4 | `04-rh.md` | RH : validation des heures sup, feuilles de temps, exports | F-TPS-06, 07 | W06.3 |
 | W07 | `web/07-conges.md` | Types, demande EMP → MGR → RH, calcul des jours, soldes, calendrier d'équipe, blocage dossier incomplet | F-ABS-01 à 04 | W06 |
 | W08 | `web/08-contrats/` | Contrats | F-CTR-01 à 04 | W07 |
@@ -192,6 +192,7 @@ Le web livre le serveur de toutes les fonctions, mais certaines ne peuvent être
 | F-PLT-06 Sauvegardes (archives demandées : hors système) | MEP |
 | F-PLT-07 Page d'accueil publique | W01 |
 | F-PLT-08 Fiche « Application mobile » | W01, E10 |
+| F-PLT-09 Factures des entreprises | W01, C02 (lecture) |
 | F-ADM-01 Invitations | W02 |
 | F-ADM-02 Rattachement | W02 |
 | F-ADM-03 Matrice des droits par écran | W02 |
@@ -212,7 +213,7 @@ Le web livre le serveur de toutes les fonctions, mais certaines ne peuvent être
 | F-EMP-06 Taux de complétude | W04.3 |
 | F-EMP-07 Cycle de l'employé | W04.1, W12.2 |
 | F-EMP-08 Cumuls annuels | W09.6, E07 |
-| F-EMP-09 Pièces obligatoires et blocages | W04.3 (complétude), W07, W09.6, W12.3 (blocages) |
+| F-EMP-09 Pièces obligatoires et blocages | W04.3 (complétude), W07, W12.3 (blocages), W09.6 (signalement dans les paiements) |
 | F-EMP-10 Relances | W04.3 |
 | F-NFC-01 à 06 Cartes | W05, E01, E03, B03, C01 |
 | F-NFC-07 Design de la carte | W05 (neutre), W16 |
@@ -222,6 +223,7 @@ Le web livre le serveur de toutes les fonctions, mais certaines ne peuvent être
 | F-TPS-05 Corrections | W06.3 |
 | F-TPS-06 Heures supplémentaires | W06.1, W06.2, W06.3, W06.4 |
 | F-TPS-07 Feuille de temps | W06.4 |
+| F-TPS-08 Pointage de secours | W06.1, W06.2, W06.3, B03 |
 | F-ABS-01 à 04 Congés et absences | W07, E05 |
 | F-CTR-01 Bibliothèque de blocs | W08.1 |
 | F-CTR-02 Cycle du contrat | W08.2, W08.3, W08.4, E06 |
@@ -252,7 +254,7 @@ Le web livre le serveur de toutes les fonctions, mais certaines ne peuvent être
 | F-MOB-04 Validations MGR et RH | E02, E04, E05 |
 | F-MOB-05 Verrouillage, version minimale | W02 (version minimale côté API), E01 |
 | F-MOB-06 Modules masqués | E00, E09 |
-| F-IDN-01 Charte neutre | W03 (premier PDF) |
+| F-IDN-01 Charte neutre | W03 (documents de l'entreprise ; générateur de PDF créé en W01.11) |
 | F-IDN-02 à 06 | W16 |
 
 ### 8.2 Exigences non fonctionnelles

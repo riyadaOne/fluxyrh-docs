@@ -16,6 +16,7 @@ Construire l'espace de RIYADA ONE (`platform.fluxyrh.app`) : connexion des admin
 | F-PLT-04 | Tableau de bord plateforme (les indicateurs d'effectifs et d'activité s'ajoutent en W02 et W04) |
 | F-PLT-07 | Page d'accueil publique `fluxyrh.app` |
 | F-PLT-08 | Fiche « Application mobile » : identifiants, export de configuration de build (l'envoi du lien d'installation est ajouté en W02) |
+| F-PLT-09 | Factures des entreprises, émission proposée chaque mois (W01.11) |
 | T-14 (début) | Sanctum, Scramble, premier contrat d'API (`/api/v1/platform`) |
 
 À lire : PRD §7.1, §8.1 à §8.3 ; TRD §5.3 (provisionnement), §6, §7.1, §7.5, §17 ; APPFLOW §3.6, §4.1, §5.1 ; BACKEND SCHEMA §4.1 à §4.3, §6 (abonnement), §7 ; UX/UI §5, §6.1, §6.10, §14.
@@ -116,7 +117,7 @@ Un abonnement `suspendu` ou `resilie` bloque l'espace de l'entreprise : page « 
 - Installation de Sanctum (jetons à UUID, suppression logique) et de Scramble.
 - Migration générale `personal_access_tokens` (BACKEND SCHEMA §4.1) ; ability `platform`.
 - Chaîne `api` plateforme : `EnsurePlatformHost` → `EnsureSupportedAppVersion` (426, version minimale de la Console en configuration) → `auth:sanctum` → `EnsurePlatformAdmin`.
-- Points d'API `/api/v1/platform` : `login` (mot de passe + 2FA, 422 `two_factor`), `logout`, `me`, `companies` (liste, fiche), `activity-log` (lecture). La file des cartes arrive en W05.
+- Points d'API `/api/v1/platform` : `login` (mot de passe + 2FA, 422 `two_factor`), `logout`, `me`, `dashboard` (indicateurs), `companies` (liste, fiche : statut, palier, modules ; l'effectif s'ajoute en W04, les factures en W01.11), `activity-log` (lecture) : tout ce que la Console lit (C02). La file des cartes arrive en W05.
 - Commande `api:contract` et test « contrat à jour » (TRD §17.2).
 
 **Critère de fin** : un client HTTP de test se connecte, liste les entreprises, est refusé sans 2FA, sans ability `platform` ou sous la version minimale ; le contrat OpenAPI est généré.
@@ -124,8 +125,9 @@ Un abonnement `suspendu` ou `resilie` bloque l'espace de l'entreprise : page « 
 ### W01.9 — Fiche « Application mobile »
 
 - Onglet de la fiche entreprise : identifiant Android, bundle iOS, liens des stores (uniques entre entreprises).
-- Export de la configuration de build (flavor) : fichier téléchargeable avec nom de l'app, identifiants, URL de l'API (`https://{slug}.fluxyrh.app`), slug. Le format définitif est arrêté en E10 ; W01 livre la version minimale.
-- L'envoi du lien d'installation après acceptation d'une invitation est ajouté en W02 ; `assetlinks.json` en E10 (il exige l'empreinte du certificat de signature, colonne à ajouter au BACKEND SCHEMA à ce moment).
+- Export de la configuration de build (flavor) : fichier téléchargeable avec nom de l'app, identifiants, URL de l'API (`https://{slug}.fluxyrh.app`), slug, couleur de fond de l'icône adaptative : format complet dès W01.9.
+- Colonnes `mobile_android_sha256` (empreinte du certificat de signature Android) et `mobile_ios_team_id` (identifiant d'équipe Apple) sur `companies`, champs de la fiche ; routes `/.well-known/assetlinks.json` et `/.well-known/apple-app-site-association` servies par chaque sous-domaine d'entreprise (vides tant que les champs ne sont pas renseignés) ; BACKEND SCHEMA mis à jour.
+- L'envoi du lien d'installation après acceptation d'une invitation est ajouté en W02.
 
 **Critère de fin** : export téléchargé conforme ; doublon d'identifiant refusé.
 
@@ -188,5 +190,5 @@ Un abonnement `suspendu` ou `resilie` bloque l'espace de l'entreprise : page « 
 | Indicateurs de connexions | W02 |
 | Effectifs, dépassement de palier | W04 |
 | File des cartes à encoder (web et API) | W05 |
-| `assetlinks.json`, format définitif de l'export de flavor | E10 |
+| Saisie des empreintes et publication des apps | E10 |
 | Écrans de la Console | C00 à C02 |

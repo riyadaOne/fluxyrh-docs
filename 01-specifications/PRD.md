@@ -4,7 +4,7 @@
 |---|---|
 | **Produit** | FluxyRH — SIRH SaaS multi-entreprises (web + mobile + carte NFC employé) |
 | **Éditeur** | RIYADA ONE TECHNOLOGIES SARL (N'Djamena, Tchad) |
-| **Version du document** | 1.0 (brouillon) — 2026-10-27 |
+| **Version du document** | 1.1 (brouillon) — 2026-10-28 : aligné sur les décisions prises en validant le plan d'implémentation |
 | **Lecteurs** | Équipe technique et produit |
 | **Statut** | Refonte complète : aucun code existant. FluxyHR v1 sert uniquement de référence fonctionnelle |
 | **Documents liés** | TRD, APPFLOW, UX/UI DESIGN, BACKEND SCHEMA (même dossier `01-specifications/`) |
@@ -49,9 +49,10 @@ FluxyRH est la **base de données RH centralisée et authentique** d'une entrepr
 Le produit se compose de :
 
 - une **application web** (Laravel / Livewire) avec deux espaces : l'espace **plateforme** (RIYADA ONE) et un espace par **entreprise** (sous-domaine `{slug}.fluxyrh.app`) ;
-- une **application mobile** (React Native) **en marque blanche** (un build, un nom, une icône et une fiche store par entreprise) pour tous les rôles de l'entreprise, utilisable hors ligne pour le pointage, la consultation et les demandes ;
+- une **application mobile** (React Native, **Android et iOS**) **en marque blanche** (un build, un nom, une icône et une fiche store par entreprise) pour tous les rôles de l'entreprise, utilisable hors ligne pour le pointage, la consultation et les demandes ;
+- une **application Borne** (Android) installée sur les appareils de site fournis par l'entreprise ;
 - une **application Console** (RIYADA ONE) qui encode les cartes NFC et suit les entreprises ;
-- une **carte NFC employé** : badge vérifiable, confirmation du pointage, accès rapide au dossier, connexion par carte + PIN, signature d'actions ;
+- une **carte NFC employé** : badge vérifiable, confirmation du pointage, accès rapide au dossier, connexion par carte + PIN, signature d'actions (les documents peuvent aussi être signés sans carte, par mot de passe ou code du téléphone) ;
 - un **pointage sur site** : QR code dynamique affiché sur chaque site, scanné puis confirmé par la carte NFC.
 
 FluxyRH est vendu **par abonnement à l'entreprise**, sous forme d'un **socle** complet et de cinq **modules payants**.
@@ -89,7 +90,7 @@ FluxyRH est vendu **par abonnement à l'entreprise**, sous forme d'un **socle** 
 | **Authentifier** | Chaque donnée a un propriétaire qui la saisit et un vérificateur qui la valide, sur justificatif |
 | **Centraliser** | Un dossier unique par employé, consultable par chaque acteur selon ses droits, champ par champ |
 | **Fluidifier** | Circuits de validation (congés, heures sup, événements, paie) sans papier ni ressaisie |
-| **Prouver** | Pointage QR + carte, signature d'actions par carte, journal d'audit complet |
+| **Prouver** | Pointage QR + carte, signature d'actions dans le système (avec ou sans carte), journal d'audit complet |
 
 ### 4.2 Différenciateurs
 
@@ -108,31 +109,31 @@ FluxyRH est vendu **par abonnement à l'entreprise**, sous forme d'un **socle** 
 
 | Rôle | Code (proposé) | Espace | Web | Mobile | Création du compte |
 |---|---|---|---|---|---|
-| Administrateur plateforme | (garde `platform`) | Plateforme | ✅ | ✅ Console | Par un autre admin plateforme |
+| Administrateur plateforme | (garde `platform`) | Plateforme | ✅ | ✅ Console | Par une commande sur le serveur |
 | Administrateur entreprise | `admin_entreprise` | Entreprise | ✅ | ✅ | Invité par la plateforme (le premier) ou par un admin entreprise |
-| Direction (DG / DAF) | `direction` | Entreprise | ✅ | ✅ | Invitation |
-| Responsable RH | `rh` | Entreprise | ✅ | ✅ | Invitation |
-| Gestionnaire de paie / Comptable | `gestionnaire_paie` | Entreprise | ✅ | ✅ | Invitation |
-| Manager hiérarchique | `manager` | Entreprise | ✅ | ✅ | Invitation (rôle `manager` ; son équipe = les employés qui lui sont rattachés) |
-| Employé | `employe` | Entreprise | ✅ | ✅ | Invitation (ou import Jobyflow suivi d'une invitation) |
+| Direction (DG / DAF) | `direction` | Entreprise | ✅ | ✅ | Invitation par le RH |
+| Responsable RH | `rh` | Entreprise | ✅ | ✅ | Le premier par l'admin entreprise, les suivants par le RH |
+| Gestionnaire de paie / Comptable | `gestionnaire_paie` | Entreprise | ✅ | ✅ | Invitation par le RH |
+| Manager hiérarchique | `manager` | Entreprise | ✅ | ✅ | Invitation par le RH. L'équipe d'une personne = ses subordonnés directs (et indirects), **quel que soit son rôle** |
+| Employé | `employe` | Entreprise | ✅ | ✅ | Invitation par le RH (ou import Jobyflow suivi d'une invitation) |
 
 Une personne n'a **qu'une identité** (base générale) mais un **rattachement par entreprise**, avec son rôle et son statut. Tout acteur de l'entreprise (y compris RH, manager, direction) est aussi un **employé** avec son propre dossier. Seule exception : l'**admin entreprise**, dont le dossier est **optionnel** (admin interne avec dossier, ou prestataire externe sans dossier).
 
 ### 5.2 Personas
 
-**Administrateur plateforme (RIYADA ONE)** : crée les entreprises et leur base, gère les abonnements et les modules, encode les cartes NFC avec la Console, assure les sauvegardes et produit les archives mensuelles demandées. *Attente* : piloter plusieurs entreprises sans voir leurs données internes.
+**Administrateur plateforme (RIYADA ONE)** : crée les entreprises et leur base, gère les abonnements et les modules, émet les factures, encode les cartes NFC avec la Console, assure les sauvegardes et prépare hors système les archives demandées. *Attente* : piloter plusieurs entreprises sans voir leurs données internes.
 
-**Administrateur entreprise** : invitations et comptes, configuration (identité, sites, structure, types de documents, politique de mot de passe), matrice des droits, demandes de cartes NFC, journal d'audit, liste des utilisateurs connectés. *Ne voit pas* les salaires ni les coordonnées bancaires. *Attente* : configurer l'entreprise seul.
+**Administrateur entreprise** : invite le premier RH et les autres admins, gère les comptes, configuration (identité, sites, structure, types de documents, politique de mot de passe), matrice des droits, demandes de cartes NFC, journal d'audit, liste des utilisateurs connectés. *Ne voit pas* les salaires ni les coordonnées bancaires. *Attente* : configurer l'entreprise seul.
 
 **Direction (DG / DAF)** : tableaux de bord, masse salariale et simulations, approbation finale de la paie, validation des décisions sensibles. *Attente* : des chiffres fiables et la main sur les décisions qui engagent l'entreprise.
 
-**Responsable RH** : invite les employés et fixe leur affectation (poste, département, site, manager, type, date d'embauche), vérifie les données saisies par les employés, rédige les contrats, valide congés, heures sup et événements, valide les variables de paie. Voit la rémunération contractuelle, *pas* les bulletins ni les coordonnées bancaires. *Attente* : vérifier au lieu de saisir.
+**Responsable RH** : invite la direction, le gestionnaire de paie, les managers et les employés, fixe leur affectation (poste, département, site, manager, type, date d'embauche), vérifie les données saisies par les employés, rédige les contrats, valide congés, heures sup et événements, valide les variables de paie. Voit la rémunération contractuelle, *pas* les bulletins ni les coordonnées bancaires. *Attente* : vérifier au lieu de saisir.
 
-**Gestionnaire de paie / Comptable** : paramètre les rubriques de paie, saisit les éléments de rémunération, vérifie les coordonnées bancaires, calcule et contrôle la paie, produit les déclarations et l'export comptable. *Attente* : une paie juste du premier coup, traçable.
+**Gestionnaire de paie / Comptable** : paramètre les rubriques de paie, saisit les éléments de rémunération, vérifie les coordonnées bancaires, calcule et contrôle la paie, enregistre les paiements faits hors système, produit les déclarations et l'export comptable. *Attente* : une paie juste du premier coup, traçable.
 
-**Manager hiérarchique** : approuve les congés de son équipe, corrige le pointage avec motif, déclare les heures supplémentaires, propose des événements (promotion, sanction), évalue. *Attente* : gérer son équipe depuis son téléphone.
+**Manager hiérarchique** : approuve les congés de son équipe, corrige le pointage avec motif, établit à l'avance les heures supplémentaires, propose des événements (promotion, sanction), évalue. *Attente* : gérer son équipe depuis son téléphone.
 
-**Employé** : complète et tient à jour son dossier (état civil, coordonnées, pièces, diplômes, banque), pointe, demande congés et documents, consulte bulletins, contrat, soldes, cumuls annuels, signe par carte. *Attente* : savoir ce qui est enregistré sur lui et ne plus faire la queue au service RH.
+**Employé** : complète et tient à jour son dossier (état civil, coordonnées, pièces, diplômes, banque), pointe, demande congés et documents, consulte bulletins, contrat, soldes, cumuls annuels, signe et accuse réception (avec ou sans carte). *Attente* : savoir ce qui est enregistré sur lui et ne plus faire la queue au service RH.
 
 ---
 
@@ -170,6 +171,7 @@ Une personne n'a **qu'une identité** (base générale) mais un **rattachement p
 | F-PLT-06 | Sauvegarde technique quotidienne de chaque base ; une archive des données demandée par l'entreprise (mensuelle ou à la résiliation) est préparée **hors système** par RIYADA ONE | Plateforme |
 | F-PLT-07 | Page d'accueil publique `fluxyrh.app` (présentation) | Plateforme |
 | F-PLT-08 | Fiche « Application mobile » par entreprise : identifiants de l'app, export de la configuration de build (flavor), liens des stores qui déclenchent l'invitation à installer l'app | Plateforme |
+| F-PLT-09 | Factures des entreprises : chaque mois, la plateforme propose les factures à émettre (montant calculé selon le palier, les modules et la fréquence) ; l'admin plateforme les émet ; PDF numéroté sans trou, statut `À payer` → `Payée` / `Annulée` ; paiement fait hors système et enregistré ; l'admin de l'entreprise consulte ses factures | Plateforme |
 
 ### 7.2 Administration de l'entreprise et accès
 
@@ -181,7 +183,7 @@ Une personne n'a **qu'une identité** (base générale) mais un **rattachement p
 | F-ADM-04 | Droits **par donnée** : les champs sensibles (salaire, rémunération, banque) suivent P6, quelles que soient les délégations d'écran | Socle |
 | F-ADM-05 | Politique de mot de passe paramétrable : longueur, complexité, expiration ; 2FA activable et imposable par rôle | Socle |
 | F-ADM-06 | Liste des utilisateurs connectés (web et mobile) et déconnexion forcée d'une session | Socle |
-| F-ADM-07 | Configuration : identité de l'entreprise (logo, RCCM, NIU, n° CNPS, adresse), format du matricule, langue officielle, fuseau horaire, devise | Socle |
+| F-ADM-07 | Configuration : identité de l'entreprise (raison sociale, logo, adresse, **identifiants légaux paramétrables** : libellé et valeur, ex. RCCM, NIU, n° CNPS, SIRET, avec le choix de ceux affichés sur les documents), format du matricule, langue officielle, fuseau horaire, devise | Socle |
 | F-ADM-08 | Journal d'audit en lecture seule : utilisateur, action, donnée, valeurs avant / après, IP, appareil ; filtres et export | Socle |
 | F-ADM-09 | Corbeille restaurable sur chaque liste | Socle |
 
@@ -207,9 +209,9 @@ Une personne n'a **qu'une identité** (base générale) mais un **rattachement p
 | Pièce d'identité, diplômes, certificats, autres justificatifs (avec fichier) | Employé | RH |
 | Coordonnées bancaires | Employé | Gestionnaire de paie |
 | Poste, structure, site, manager, type d'employé, date d'embauche | RH (à l'invitation, puis via événements) | — |
-| Rémunération contractuelle (salaire de base, avantages écrits au contrat) | RH (dans le contrat) | Employé et direction (signature) |
+| Rémunération contractuelle (salaire de base, avantages écrits au contrat) | RH (dans le contrat) | Signataires du contrat : l'employé et les signataires de l'entreprise choisis par le RH |
 | Éléments de rémunération de la paie (rubriques, variables) | Gestionnaire de paie | — |
-| Documents de l'entreprise remis à l'employé | RH | Employé (accusé de réception par carte) |
+| Documents de l'entreprise remis à l'employé | RH | Employé (accusé de réception, avec ou sans carte) |
 
 | ID | Exigence | Offre |
 |---|---|---|
@@ -219,7 +221,7 @@ Une personne n'a **qu'une identité** (base générale) mais un **rattachement p
 | F-EMP-04 | Liste de travail du vérificateur : données en attente, justificatif à côté de la valeur, comparaison avec la valeur précédente ; personne ne vérifie ses propres données, les coordonnées bancaires sont vérifiées par le gestionnaire de paie (par la direction pour celles d'un gestionnaire de paie), et les autres données d'un RH toujours par la direction | Socle |
 | F-EMP-05 | Types de documents **paramétrés par l'entreprise** (obligatoire ou non, avec ou sans date d'expiration, qui les dépose, qui les voit) ; alerte avant expiration | Socle |
 | F-EMP-06 | Taux de complétude du dossier par employé et pour l'entreprise | Socle |
-| F-EMP-07 | Cycle de l'employé : `Invité` → `Actif` → `En sortie` → `Sorti` ; un employé sorti garde son dossier en lecture seule | Socle |
+| F-EMP-07 | Cycle de l'employé : `Invité` → `Actif` → `En sortie` → `Sorti` ; un employé sorti garde son dossier en lecture seule ; son accès se coupe à la date de sortie ; pas de sortie sans résiliation du contrat actif | Socle |
 | F-EMP-08 | Cumuls annuels consultables par l'employé (brut, net, cotisations, impôt) | Socle |
 | F-EMP-09 | **Pièces obligatoires paramétrées par l'entreprise** (par type d'employé) ; tant qu'elles ne sont pas toutes `Vérifiées` : pas de demande de congé, pas de formulaire type (attestation), signalement dans le suivi des paiements ; pointage et paie restent possibles | Socle |
 | F-EMP-10 | Relances automatiques de l'employé (notification, e-mail) et indicateur de complétude pour le RH | Socle |
@@ -244,9 +246,10 @@ Une personne n'a **qu'une identité** (base générale) mais un **rattachement p
 | F-TPS-02 | Pointage : l'employé scanne le **QR dynamique** du site (renouvelé toutes les N secondes) puis confirme avec sa **carte NFC** ; sur son téléphone ou sur la borne du site | Socle |
 | F-TPS-03 | Pointage hors ligne : QR et carte vérifiés à l'envoi, accepté s'il est transmis dans une fenêtre configurable (48 h proposées) | Socle |
 | F-TPS-04 | Calcul automatique : heures travaillées, retard, départ anticipé, absence non justifiée, selon le planning | Socle |
-| F-TPS-05 | Correction de pointage par le manager, motif obligatoire, journalisée ; jamais sur une période de paie clôturée | Socle |
+| F-TPS-05 | Correction de pointage par le manager, motif obligatoire, journalisée, sur les X derniers jours (délai réglé par l'entreprise) ; jamais sur une période de paie clôturée | Socle |
 | F-TPS-06 | Heures supplémentaires : règles **paramétrables par l'entreprise** (seuils, majorations par tranche, nuit, jour férié, plafonds) ; **établies à l'avance** par le manager (sans cela, le temps au-delà du planning n'est pas compté), minutes réalisées calculées d'après les pointages → `Validées` / `Refusées` par le RH → intégrées aux variables de paie | Socle |
 | F-TPS-07 | Feuille de temps mensuelle par employé, export | Socle |
+| F-TPS-08 | Pointage de secours sur la borne pour un employé sans sa carte : matricule + photo prise par la borne, statut « à valider », compté seulement après la validation du manager ; nombre maximal par mois réglé par l'entreprise | Socle |
 
 ### 7.7 Congés et absences
 
@@ -261,8 +264,8 @@ Une personne n'a **qu'une identité** (base générale) mais un **rattachement p
 
 | ID | Exigence | Offre |
 |---|---|---|
-| F-CTR-01 | Modèles de contrat rédigés dans l'application (éditeur de texte avec champs de fusion : employé, poste, dates, rémunération…) | Socle |
-| F-CTR-02 | Cycle `Brouillon` → `À signer` → `Signé` (employé par carte, puis direction) → `Actif` → `Terminé` / `Résilié` (motif, date, type) | Socle |
+| F-CTR-01 | Contrats rédigés dans l'application **par blocs** : une bibliothèque de blocs (clauses) créée à la configuration, dans la langue officielle, proposée à la rédaction selon la nature du contrat et le type d'employé ; ajout de blocs libres ; champs de fusion (employé, poste, dates, rémunération…) | Socle |
+| F-CTR-02 | Cycle `Brouillon` → `À signer` → `Signé` → `Actif` → `Terminé` / `Résilié` (motif, date, type). Le RH choisit les signataires et leur ordre (l'employé et un ou plusieurs signataires de l'entreprise) ; copies papier imprimées pour la signature manuscrite **et** signature de chacun dans le système (avec ou sans carte) ; le contrat reste modifiable tant que toutes les signatures ne sont pas réunies, chaque modification annulant les signatures déjà faites | Socle |
 | F-CTR-03 | Un seul contrat actif par employé ; avenants ; alerte d'échéance (CDD, période d'essai, stage) | Socle |
 | F-CTR-04 | Génération PDF à l'en-tête de l'entreprise ; le RH rédige le contrat, rémunération contractuelle comprise (exception de P6) | Socle |
 
@@ -274,9 +277,9 @@ Une personne n'a **qu'une identité** (base générale) mais un **rattachement p
 | F-PAY-02 | **Aucun paramétrage de pays livré** : chaque entreprise saisit ses rubriques, taux et barèmes selon sa législation (décision 0002) ; des jeux de démonstration servent aux tests | Socle |
 | F-PAY-03 | Historique des versions du paramétrage avec date d'effet : une modification ne change pas les bulletins passés | Socle |
 | F-PAY-04 | Le salaire de base vient du contrat actif ; les autres rubriques fixes de l'employé sont saisies par le gestionnaire de paie | Socle |
-| F-PAY-05 | Période de paie : `Ouverte` → `Variables validées` (RH : présences, congés, heures sup, événements) → `Calculée` → `Contrôlée` (gestionnaire de paie) → `Approuvée` (direction) → `Clôturée` (bulletins publiés, période verrouillée) ; une période par **fréquence de paie** utilisée (mensuelle, quinzaine, hebdomadaire, journalière), la fréquence étant fixée par employé (défaut issu du type d'employé) | Socle |
+| F-PAY-05 | Période de paie : `Ouverte` → `Variables validées` (RH : présences, congés, heures sup) → `Calculée` → `Contrôlée` (gestionnaire de paie) → `Approuvée` (direction) → `Clôturée` (bulletins publiés, période verrouillée) ; une période par **fréquence de paie** utilisée (mensuelle, quinzaine, hebdomadaire, journalière), la fréquence étant fixée par employé (défaut issu du type d'employé) | Socle |
 | F-PAY-06 | Checklist intégrée à chaque période, avec étapes bloquantes ; sa dernière étape est l'**ouverture de la période suivante**, proposée à la clôture, ou faite par le système si l'entreprise active l'ouverture automatique pour cette fréquence | Socle |
-| F-PAY-07 | Bulletin PDF (mentions légales de l'entreprise), publié dans l'espace de l'employé, accusé de réception par carte ; réimpression des périodes passées | Socle |
+| F-PAY-07 | Bulletin PDF (mentions légales de l'entreprise), publié dans l'espace de l'employé, accusé de réception (avec ou sans carte) ; réimpression du même PDF figé | Socle |
 | F-PAY-08 | Statut de paiement par bulletin (`À payer` → `Payé` / `Échec`), enregistré par le gestionnaire de paie : les paiements (virements, espèces, mobile money) se font **hors de FluxyRH** | Socle |
 | F-PAY-09 | Journal de paie et états de cotisations par période, export | Socle |
 | F-PAY-10 | Avances et prêts sur salaire, **activables par l'entreprise** selon sa politique (plafonds, nombre d'échéances) : `Demandé` (employé) → `Accepté` (gestionnaire de paie) → `Approuvé` (direction) / `Refusé` (motif) → `En remboursement` → `Soldé` ; échéances prélevées en retenue sur les paies suivantes | Socle |
@@ -295,27 +298,27 @@ Une personne n'a **qu'une identité** (base générale) mais un **rattachement p
 | ID | Exigence | Offre |
 |---|---|---|
 | F-PRO-01 | Événements datés sur le dossier (promotion, mutation, augmentation, sanction, avertissement, félicitation…), types paramétrables : `Proposé` (manager) → `Validé` / `Refusé` (RH) ; un événement validé met à jour le dossier | Processus RH |
-| F-PRO-02 | Workflows d'entrée, de sortie et de mutation : liste de tâches par acteur, échéances, e-mails et notifications | Processus RH |
-| F-PRO-03 | Courriers types avec champs de fusion, envoyés en masse (PDF et e-mail), accusé de réception par carte | Processus RH |
-| F-PRO-04 | Formulaires types demandés par l'employé (attestation de travail, de salaire…) : `Demandé` → `Prêt` / `Refusé` → `Remis` | Processus RH |
+| F-PRO-02 | Workflows d'entrée, de sortie et de mutation : liste de tâches par acteur, échéances, e-mails et notifications ; le lancement est **proposé au RH**, jamais automatique | Processus RH |
+| F-PRO-03 | Courriers types avec champs de fusion, envoyés en masse (PDF et lien par e-mail), accusé de réception (avec ou sans carte), signature de la direction quand le modèle l'exige | Processus RH |
+| F-PRO-04 | Formulaires types demandés par l'employé (attestation de travail, de salaire…) : `Demandé` → (`À signer` si la signature de la direction est exigée) → `Prêt` / `Refusé` → `Remis` | Processus RH |
 
 ### 7.12 Talents (module)
 
 | ID | Exigence | Offre |
 |---|---|---|
-| F-TAL-01 | Évaluations 360° : campagnes, poids par type d'évaluateur, une réponse par évaluateur, rapport, évaluation clôturée immuable | Talents |
+| F-TAL-01 | Évaluations 360° : campagnes, évaluateurs choisis par le RH (un par un ou par groupe), poids par type d'évaluateur, anonymat paramétré par campagne, une réponse par évaluateur, clôture bloquée tant qu'une réponse manque, rapport, évaluation clôturée immuable | Talents |
 | F-TAL-02 | Référentiel de compétences, compétences par employé, recherche par compétence | Talents |
 | F-TAL-03 | Parcours de carrière et historique des postes | Talents |
-| F-TAL-04 | Import des candidats retenus depuis **Jobyflow (API)** : données pré-remplies, puis invitation | Talents |
+| F-TAL-04 | Import des candidats retenus depuis **Jobyflow (API)** : invitation pré-remplie, puis données proposées dans le dossier, que l'employé confirme lui-même | Talents |
 
 ### 7.13 Conformité et déclarations (module)
 
 | ID | Exigence | Offre |
 |---|---|---|
-| F-CNF-01 | Déclaration CNPS : saisie et consolidation des informations requises par période, à partir de la paie clôturée | Conformité |
-| F-CNF-02 | Déclaration fiscale (IRPP et taxes) : idem | Conformité |
-| F-CNF-03 | Bilan social annuel : indicateurs consolidés | Conformité |
-| F-CNF-04 | Export comptable des écritures de paie : **format d'import Sage** et **format générique** (CSV / Excel : journal, date, compte, libellé, débit, crédit) ; plan comptable SYSCOHADA et correspondance rubrique → compte paramétrables | Conformité |
+| F-CNF-01 | Déclarations sociales et fiscales : **modèles de déclaration décrits par l'entreprise** (aucun formulaire de pays codé), colonnes reliées aux rubriques, aux totaux de paie, au dossier ou à saisir ; lignes consolidées à partir de la paie clôturée | Conformité |
+| F-CNF-02 | Cycle d'une déclaration `Brouillon` → `Préparée` (fichier exporté) → `Déposée` (référence du dépôt, fait hors système) | Conformité |
+| F-CNF-03 | Bilan social annuel composé par l'entreprise à partir d'un catalogue d'indicateurs | Conformité |
+| F-CNF-04 | Export comptable des écritures de paie : **format d'import Sage** et **format générique** (CSV / Excel : journal, date, compte, libellé, débit, crédit) ; plan comptable (SYSCOHADA ou autre) saisi ou importé par l'entreprise et correspondance rubrique → compte paramétrables ; Sage retenu : Sage 100 Comptabilité | Conformité |
 
 FluxyRH **prépare** les informations ; il ne transmet pas les déclarations aux organismes.
 
@@ -334,7 +337,7 @@ FluxyRH **prépare** les informations ; il ne transmet pas les déclarations aux
 | F-PIL-01 | Tableaux de bord par rôle, personnalisables (widgets) | Pilotage |
 | F-PIL-02 | Rapports standard (effectifs, présences, absences, paie, turnover) avec filtres et export | Pilotage |
 | F-PIL-03 | États personnalisés : choix des champs, filtres, regroupements, sauvegarde et partage | Pilotage |
-| F-PIL-04 | Accès aux données pour un outil externe (API de lecture ou export planifié), respectant P6 | Pilotage |
+| F-PIL-04 | Accès aux données pour un outil externe par une API de lecture et des clés d'accès, respectant P6 (pas d'export planifié en v1) | Pilotage |
 
 Sans le module, chaque rôle dispose d'une page d'accueil avec ses **tâches en attente** (Socle).
 
@@ -348,7 +351,7 @@ Sans le module, chaque rôle dispose d'une page d'accueil avec ses **tâches en 
 
 | ID | Exigence | Offre |
 |---|---|---|
-| F-MOB-01 | Marque blanche : une application par entreprise (nom, icône, fiche store), pour tous ses rôles ; écrans selon les droits | Socle |
+| F-MOB-01 | Marque blanche : une application par entreprise sur **Android et iOS** (nom, icône, fiches Google Play et App Store), pour tous ses rôles ; écrans selon les droits | Socle |
 | F-MOB-02 | Pointage QR + NFC, mode borne de site (appareil partagé, lecture des cartes de tous les employés) | Socle |
 | F-MOB-03 | Hors ligne : pointage, consultation (dossier, bulletins, planning, soldes) en cache chiffré, demandes (congés, saisies du dossier) mises en file et envoyées au retour du réseau | Socle |
 | F-MOB-04 | Actions de validation du manager et du RH (congés, heures sup, vérification de données) | Socle |
@@ -365,7 +368,7 @@ L'**interface** de FluxyRH (web, mobile, borne) garde l'identité neutre FluxyRH
 | F-IDN-02 | Choix d'un modèle de charte parmi **12 modèles prédéfinis**, avec aperçu sur des documents types (bulletin, contrat, attestation, e-mail) avant activation | Identité |
 | F-IDN-03 | Réglages du modèle choisi : **couleur** prise dans une palette fermée de couleurs testées (lisibilité, impression), **en-tête et pied de page** (logo, raison sociale, RCCM, NIU, n° CNPS, adresse, site web, mentions), **cachet** de l'entreprise et **signature** de la direction (images), **filigrane** (logo ou mention « Confidentiel », « Copie ») | Identité |
 | F-IDN-04 | Carte employé : 20 designs recto / verso aux couleurs de la charte (F-NFC-07) | Identité |
-| F-IDN-05 | La signature d'un directeur est déposée par lui-même et n'est apposée que sur les documents qu'il a signés par carte ; le cachet est apposé sur les documents officiels (contrats, attestations, courriers) | Identité |
+| F-IDN-05 | La signature d'un directeur est déposée par lui-même et n'est apposée que sur les documents qu'il a signés dans le système (contrats, avenants, courriers et formulaires qui exigent sa signature) ; le cachet est apposé sur les documents officiels (contrats, attestations, courriers) | Identité |
 | F-IDN-06 | Chaque charte est **versionnée** ; un document garde la charte de sa génération (PDF figé avec empreinte) ; une nouvelle charte ne s'applique qu'aux documents générés après son activation ; à l'arrêt du module, les nouveaux documents reprennent la charte neutre ; chaque changement est journalisé | Socle (versions) / Identité |
 
 ---
@@ -383,7 +386,7 @@ Accès par invitation, droits par écran et par donnée, dossiers employés auth
 | Pilotage | `pilotage` | Tableaux de bord à widgets, rapports, états personnalisés, accès externe aux données |
 | Masse salariale | `masse_salariale` | Analyses, simulations, comparaison, modèles de rémunération |
 | Talents | `talents` | Évaluations 360°, compétences, carrières, import Jobyflow |
-| Conformité | `conformite` | Déclarations CNPS et fiscales, bilan social, export comptable |
+| Conformité | `conformite` | Modèles de déclaration sociale et fiscale, bilan social, export comptable |
 | Processus RH | `processus_rh` | Événements, workflows entrée / sortie / mutation, courriers en masse, formulaires types |
 | Identité (**option hors pack**) | `identite` | 12 modèles de charte pour les documents, palette, en-tête et pied, cachet, signature, filigrane, 20 designs de carte (sans le module : charte neutre) |
 
@@ -459,6 +462,8 @@ L'ordre détaillé, les dépendances et la couverture de chaque exigence sont da
 | Virements bancaires | FluxyRH n'émet ni ordre ni fichier de virement : les paiements se font hors système et le gestionnaire de paie y enregistre leur résultat |
 | Vente et encaissement des cartes NFC | Processus opérationnel de RIYADA ONE, payé par l'employé |
 | SMS | In-app, push et e-mail suffisent |
+| Archives de données à la demande dans le système | Préparées hors système par RIYADA ONE à partir des sauvegardes |
+| Export planifié vers un outil externe | Accès par API de lecture et exports manuels en v1 |
 | LDAP / SSO | Non retenu |
 | Groupe de sociétés consolidé | Une entreprise = un espace ; pas de consolidation entre entreprises |
 
@@ -512,11 +517,19 @@ Aucune question ouverte.
 | Données par défaut | Aucune donnée propre à un pays livrée (paie, jours fériés, heures sup, congés, clauses, plan comptable, banques) ; l'application sert toute entreprise, quel que soit son pays ; seeders de démonstration pour les tests (décision 0002) |
 | Connexion par carte | Option choisie par chaque utilisateur, pas par l'entreprise (F-NFC-05) |
 | Langue des documents | Les documents générés sont rédigés dans la langue officielle de l'entreprise |
+| Identifiants légaux de l'entreprise | Liste paramétrable (libellé, valeur, affichage sur les documents) au lieu de champs RCCM, NIU, CNPS figés (F-ADM-07) |
+| Factures de RIYADA ONE | Émises par la plateforme, proposées chaque mois et jamais automatiques ; paiement hors système (F-PLT-09) |
+| Signature | Avec ou sans carte pour les documents (mot de passe sur le web, code ou biométrie dans l'app) ; carte obligatoire pour le pointage (F-NFC-06) |
+| Paiements et archives | Faits hors système ; FluxyRH enregistre les paiements et ne produit ni fichier de virement ni archive à la demande (F-PAY-08, F-PLT-06) |
+| Heures supplémentaires | Établies à l'avance par le manager ; le temps au-delà du planning n'est compté que dans ce cadre (F-TPS-06) |
+| Invitations | L'admin entreprise invite le premier RH ; le RH invite tous les autres, direction et paie compris |
+| Applications | Entreprise sur Android et iOS ; Borne et Console sur Android ; Console distribuée en test interne |
+| Automatismes | Limités : le système notifie et propose ; restent automatiques l'activation et la fin des contrats, la sortie et la fin d'accès à leur date, l'effet des événements à leur date, l'ouverture de la période suivante (option), le constat d'absence et les relances |
 | Prix | Grille 8.3, −10 % en annuel |
 | Avances et prêts | Circuit employé → paie → direction, activable par l'entreprise (F-PAY-10) |
 | Dossier incomplet | Pièces obligatoires paramétrées ; blocage congés, attestations, virements ; relances (F-EMP-09, F-EMP-10) |
 | Borne de site | Fournie par l'entreprise, fonctionne hors ligne (F-ORG-03, F-ORG-06) |
-| Export comptable | Sage + format générique, SYSCOHADA (F-CNF-04) |
+| Export comptable | Sage 100 Comptabilité + format générique ; plan comptable saisi ou importé par l'entreprise (F-CNF-04) |
 | Rétention, disponibilité, performance | NF-09 à NF-13 |
 | Charte graphique | Concerne les documents générés (PDF, e-mails, carte), pas l'interface ; socle = charte neutre ; module **Identité** = 12 modèles, palette, en-tête / pied, cachet, signature, filigrane, 20 designs de carte ; option hors pack à 14 900 (< 25) (7.18, 8.3) |
 

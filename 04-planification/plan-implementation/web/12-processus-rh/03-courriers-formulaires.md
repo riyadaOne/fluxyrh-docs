@@ -83,9 +83,9 @@ W12.2 livré.
 
 | Domaine | Cas |
 |---|---|
-| Courriers | Ciblage, langue, valeurs vérifiées, PDF figé, dépôt, e-mail sans pièce jointe, accusé de réception, relance |
+| Courriers | Ciblage, langue, valeurs vérifiées, PDF figé, dépôt, e-mail sans pièce jointe, accusé de réception, relance, attente de la signature de la direction avant l'envoi quand le modèle l'exige |
 | Champs sensibles | Champ de paie refusé dans un modèle du RH ; masquage pour un lecteur non autorisé |
-| Formulaires | Dossier incomplet bloqué ; rôle qui traite ; transitions ; `remis` au téléchargement ou à l'accusé |
+| Formulaires | Dossier incomplet bloqué ; rôle qui traite ; transitions ; signature de la direction exigée avant `pret` quand le type l'exige ; `remis` au téléchargement ou à l'accusé |
 | Module | Fermé sans le module |
 | Droits | `letters`, `form_requests` ; employé limité à ses documents ; autre entreprise ; API |
 

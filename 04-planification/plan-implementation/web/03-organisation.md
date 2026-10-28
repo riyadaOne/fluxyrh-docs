@@ -72,7 +72,7 @@ F-ORG-04 (hiérarchie, équipe directe et indirecte) est construit en W04.1, ave
 
 ### W03.4 — Rendu des documents et organigramme
 
-- `DocumentRenderer` (créé en W01.11 pour les factures) étendu aux documents de l'entreprise : en-tête de l'entreprise (`company_profile`), pied avec référence et date, langue officielle, arabe par ar-php (UX/UI §13.1).
+- `DocumentRenderer` (créé en W01.11 pour les factures) étendu aux documents de l'entreprise : en-tête de l'entreprise (`company_profile` et identifiants légaux affichés), pied avec référence et date, langue officielle, arabe par ar-php (UX/UI §13.1).
 - `DocumentBrandingService::current()` renvoie la **charte neutre** ; les chartes versionnées s'ajoutent en W16. Les tables qui porteront un PDF auront `document_branding_version_id` nul = neutre (BACKEND SCHEMA §8).
 - Polices des documents sous `storage/app/public/fonts/documents`.
 - S-23 `/org-chart` : arbre de la structure (responsables et personnes ajoutés en W04.1), export PDF par `DocumentRenderer`.
@@ -93,7 +93,7 @@ F-ORG-04 (hiérarchie, équipe directe et indirecte) est construit en W04.1, ave
 ### W03.6 — Bornes : requêtes signées et signal de vie
 
 - Middleware `EnsureKiosk` (ability `kiosk:{id}`, borne `active`) et `VerifyKioskSignature` (signature ECDSA du corps et de l'horodatage, fenêtre de fraîcheur, refus d'un horodatage rejoué).
-- Points d'API `/api/v1/kiosk/config` (entreprise, site, fuseau, pas du code, langue) et `/api/v1/kiosk/heartbeat` (version, batterie, pointages en attente, dérive d'horloge mesurée) ; `last_heartbeat_at` mis à jour.
+- Points d'API `/api/v1/kiosk/config` (entreprise, site, fuseau, pas du code, langue, empreinte du code de sortie du mode kiosque, son activé ou non ; la durée « Inverser » et la liste des cartes du site s'y ajoutent en W06.2) et `/api/v1/kiosk/heartbeat` (version, batterie, pointages en attente, dérive d'horloge mesurée) ; `last_heartbeat_at` mis à jour.
 - Tâche planifiée : borne `active` sans signal depuis `kiosk_silence_alert_minutes` → e-mail à l'admin (une alerte par période de silence).
 
 **Critère de fin** : un jeton de borne volé, utilisé sans la clé privée, est refusé ; une requête rejouée est refusée ; une borne silencieuse déclenche une seule alerte.
@@ -102,6 +102,7 @@ F-ORG-04 (hiérarchie, équipe directe et indirecte) est construit en W04.1, ave
 
 - `KioskService` : `rename()`, `suspend()`, `resume()`, `revoke(reason)` (invalide jeton, clés publiques et clé HMAC ; les autres bornes ne sont pas touchées), `renewSecret()` (nouvelle clé livrée au signal de vie suivant), `reissuePairing()` pour une borne révoquée remplacée par un nouvel appareil (nouvelle borne).
 - S-14 `/kiosks` : liste par site, état (badge), dernier signal, version, batterie, pointages en attente, dérive ; actions appairer (QR affiché avec compte à rebours), renommer, suspendre, reprendre, révoquer, renouveler la clé ; toutes journalisées.
+- Réglages de chaque borne dans S-14 : **code de sortie du mode kiosque** (choisi par l'admin, stocké haché, seule son empreinte part vers la borne) et **son** activé ou non (colonnes ajoutées à `kiosks`, BACKEND SCHEMA mis à jour) ; changements journalisés.
 - API d'administration `/api/v1/admin/kiosks` (liste, état, suspendre) pour l'onglet Bornes de l'app Entreprise.
 
 **Critère de fin** : chaque transition et chaque transition interdite testées ; une borne suspendue ou révoquée reçoit 403 à sa requête suivante.

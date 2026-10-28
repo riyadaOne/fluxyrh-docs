@@ -28,7 +28,7 @@ C01 livré.
 ### C02.1 — Écrans
 
 - **Accueil** : derniers indicateurs (entreprises, abonnements, revenu récurrent, effectifs, dépassements de palier, cartes à encoder) ; **Entreprises** : liste, fiche (statut, palier, modules, effectif, factures et leur statut) ; **Journal** : filtres ; **Profil**.
-- Points d'API `/platform/*` complétés si besoin (dans `FluxyRH-web/app/`, avec leurs tests).
+- Points d'API `/platform/*` livrés par le web (W01.8, factures W01.11, cartes W05.3).
 
 ### C02.2 — Documentation et livraison
 
