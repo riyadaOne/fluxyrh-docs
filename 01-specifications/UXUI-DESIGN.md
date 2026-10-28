@@ -225,7 +225,7 @@ Configuration, Paramètres, paramétrage de paie : `flux:navlist` à gauche (≈
 - Côté employé, le bouton du bloc est « Modifier » ; une modification crée une version en attente (U10).
 - L'onglet Banque n'existe que pour les rôles autorisés (U11) ; pour les autres, l'onglet est absent.
 - Le justificatif est demandé ou non selon le réglage de l'entreprise, bloc par bloc ; les listes (situation matrimoniale, type de pièce) sont celles de l'entreprise.
-- Selon les modules : onglets Événements, Workflows, Compétences, Carrière, Rémunération (PAIE, DIR).
+- Selon les modules : onglets Événements, Workflows, Compétences, Carrière, Rémunération (PAIE, DIR, RH en lecture).
 
 ### 6.4 Liste de vérification (S-22, S-56)
 
@@ -428,7 +428,7 @@ Le badge porte **toujours** le libellé traduit du statut (la couleur n'est jama
 
 ### 13.2 Bulletin de paie
 
-Une page : identité de l'employé (matricule, poste, structure, date d'embauche, n° CNPS, type), période et date de paiement ; tableau des rubriques (code, libellé, base, taux, gains, retenues salariales, part patronale) ; totaux (brut, cotisations, imposable, impôt, net à payer) ; **net en lettres** ; cumuls annuels ; mode de paiement ; mention de l'accusé de réception le cas échéant.
+Une page : identité de l'employé (matricule, poste, structure, date d'embauche, identifiants marqués « affiché sur le bulletin », type), période et date de paiement ; tableau des rubriques (code, libellé, base, taux, gains, retenues salariales, part patronale) ; totaux (brut, cotisations, imposable, impôt, net à payer) ; **net en lettres** ; cumuls annuels ; mode de paiement ; mention de l'accusé de réception le cas échéant.
 
 ### 13.3 Carte employé
 
@@ -576,4 +576,5 @@ Proposées par Claude **module par module**, avant le développement de chaque m
 | Applications | Entreprise sur Android et iOS ; Borne et Console sur Android |
 | Éditeur de texte | Tiptap dans un composant maison `x-rich-editor` (pas de licence Flux Pro) |
 | Vérification | Une demande à la fois, jamais par lot |
+| Rémunération et RH | Le RH voit la rémunération et les bulletins en lecture ; la banque reste masquée pour lui (décision 0003) |
 | Documents | Rédigés dans la langue officielle de l'entreprise, identifiants légaux choisis par elle |

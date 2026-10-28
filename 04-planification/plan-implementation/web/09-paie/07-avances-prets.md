@@ -80,7 +80,7 @@ W09.6 livré.
 | Circuit | Chaque transition, transitions interdites, refus à chaque étape |
 | Échéancier | Division et arrondi, première période, report, regroupement à la sortie |
 | Paie | Bulletin doré « avance » ; retenue prélevée à la clôture ; `soldee` après la dernière |
-| Non-fuite | RH, ADM, MGR : aucun montant ; variable de période sans montant |
+| Non-fuite | ADM, MGR : aucun montant ; le RH voit sans saisir ; variable de période sans montant |
 | Droits | `advances` ; employé limité à ses demandes ; autre entreprise ; API |
 
 ## 8. Critères de sortie

@@ -60,7 +60,7 @@ W09.5 livré.
 
 ### W09.6.2 — Clôture et publication
 
-- `PayrollPeriodService::close(period)` : période `approuvee`, job de génération des PDF par lots (`DocumentRenderer`, gabarit UX/UI §13.2 : rubriques, totaux, **net en lettres** par `Money`, cumuls annuels, mode de paiement), écriture non écrasable, `pdf_hash`, bulletins `publie`, période `cloturee`, `closed_by`, journal, notification aux employés (sans montant).
+- `PayrollPeriodService::close(period)` : période `approuvee`, job de génération des PDF par lots (`DocumentRenderer`, gabarit UX/UI §13.2 : identifiants de l'employé marqués « affiché sur le bulletin », rubriques, totaux, **net en lettres** par `Money`, cumuls annuels, mode de paiement), écriture non écrasable, `pdf_hash`, bulletins `publie`, période `cloturee`, `closed_by`, journal, notification aux employés (sans montant).
 - Verrouillage (§4) : contrôle « période clôturée » ajouté à `ClockingService`, `AttendanceCorrectionService`, `OvertimeService`, `LeaveService`.
 
 **Critère de fin** : un pointage, une correction, une annulation de congé sur une période clôturée sont refusés ; un PDF ne peut être ni écrasé ni régénéré.
@@ -70,7 +70,7 @@ W09.5 livré.
 - `App\Services\Payroll\PayslipService` : cumuls annuels calculés depuis les bulletins publiés (brut, net, cotisations, impôt), jamais stockés (BACKEND SCHEMA §5.9).
 - S-65 `/me/payslips` : bulletins par année, téléchargement, cumuls annuels ; élément « bulletin à accuser » dans S-68.
 - Accusé de réception : `ActionSignatureService` (action `bulletin`, empreinte du PDF), `acknowledged_signature_id` ; mention sur l'écran (le PDF reste celui de la clôture).
-- Fiche S-21, onglet Rémunération (PAIE, DIR) : bulletins de l'employé ; consultation journalisée (`sensitive_data_views`).
+- Fiche S-21, onglet Rémunération (PAIE, DIR, RH) : bulletins de l'employé ; consultation journalisée (`sensitive_data_views`).
 
 ### W09.6.4 — Ouverture de la période suivante
 
@@ -104,7 +104,7 @@ W09.5 livré.
 | Cumuls | Exactitude sur une année, employé entré en cours d'année |
 | Suivante | Ouverture automatique et proposée |
 | Paiements | Enregistrement individuel et groupé, transitions, `echec` → `paye`, `paye` définitif, signalements |
-| Non-fuite | RH, ADM, MGR : aucun bulletin, aucune coordonnée bancaire, aucun export de paiements |
+| Non-fuite | ADM, MGR : aucun bulletin ; RH : bulletins visibles, mais aucune coordonnée bancaire ni export de paiements |
 | Droits | `payments` ; employé limité à ses bulletins ; autre entreprise ; API |
 
 ## 8. Critères de sortie

@@ -97,7 +97,7 @@ FluxyRH est vendu **par abonnement à l'entreprise**, sous forme d'un **socle** 
 1. **Saisie par le propriétaire + vérification** : l'inverse d'un SIRH classique où le RH saisit tout.
 2. **Pointage infalsifiable à distance** : QR dynamique du site + carte NFC personnelle.
 3. **Carte NFC employé** : badge vérifiable publiquement, connexion, signature de contrats et d'accusés de réception.
-4. **Confidentialité des salaires** : ni l'admin ni le RH ne voient les salaires et les coordonnées bancaires.
+4. **Confidentialité des salaires** : l'admin ne voit ni salaires ni coordonnées bancaires ; le RH voit les salaires mais pas la banque.
 5. **Paie 100 % paramétrable** : rubriques, cotisations et barèmes créés par l'entreprise, aucun paramétrage de pays imposé.
 6. **Cloisonnement strict** : une base de données par entreprise.
 
@@ -127,7 +127,7 @@ Une personne n'a **qu'une identité** (base générale) mais un **rattachement p
 
 **Direction (DG / DAF)** : tableaux de bord, masse salariale et simulations, approbation finale de la paie, validation des décisions sensibles. *Attente* : des chiffres fiables et la main sur les décisions qui engagent l'entreprise.
 
-**Responsable RH** : invite la direction, le gestionnaire de paie, les managers et les employés, fixe leur affectation (poste, département, site, manager, type, date d'embauche), vérifie les données saisies par les employés, rédige les contrats, valide congés, heures sup et événements, valide les variables de paie. Voit la rémunération contractuelle, *pas* les bulletins ni les coordonnées bancaires. *Attente* : vérifier au lieu de saisir.
+**Responsable RH** : invite la direction, le gestionnaire de paie, les managers et les employés, fixe leur affectation (poste, département, site, manager, type, date d'embauche), vérifie les données saisies par les employés, rédige les contrats, valide congés, heures sup et événements, valide les variables de paie. Voit toute la rémunération (contrat, éléments de paie, bulletins), *pas* les coordonnées bancaires ; ne saisit pas les montants de paie. *Attente* : vérifier au lieu de saisir.
 
 **Gestionnaire de paie / Comptable** : paramètre les rubriques de paie, saisit les éléments de rémunération, vérifie les coordonnées bancaires, calcule et contrôle la paie, enregistre les paiements faits hors système, produit les déclarations et l'export comptable. *Attente* : une paie juste du premier coup, traçable.
 
@@ -146,7 +146,7 @@ Une personne n'a **qu'une identité** (base générale) mais un **rattachement p
 | P3 | **Seule la donnée vérifiée fait foi** | Tant qu'une modification n'est pas vérifiée, la paie, les documents et les rapports utilisent la dernière valeur vérifiée |
 | P4 | **Cloisonnement strict** | Une base par entreprise ; la base générale ne porte que l'identité, les rattachements et la plateforme |
 | P5 | **Statut explicite** | Toute donnée qui passe de main en main a un statut et des transitions réservées au rôle habilité, refusées par le serveur sinon |
-| P6 | **Confidentialité par champ** | Éléments de rémunération, bulletins et coordonnées bancaires ne sont visibles que du gestionnaire de paie, de la direction et de l'employé concerné, **jamais de l'admin**. Seule exception : le RH voit la **rémunération contractuelle** (celle écrite dans le contrat), pas les bulletins ni la banque |
+| P6 | **Confidentialité par champ** | Rémunération (contrat, éléments de paie, bulletins) : gestionnaire de paie, direction, **RH** et employé concerné. Coordonnées bancaires : gestionnaire de paie, direction et employé concerné seulement. **Jamais l'admin**, ni un manager. Le RH voit les montants de paie sans les saisir (décision 0003) |
 | P7 | **Traçabilité** | Qui, quand, quoi, valeur avant / après, depuis où ; les actions automatiques sont attribuées au « Système » |
 | P8 | **Rien n'est supprimé définitivement** | Corbeille restaurable sur chaque liste ; suppression logique partout |
 | P9 | **Le serveur est seul juge** | L'app mobile masque ce qui n'est pas permis, mais chaque règle est vérifiée côté serveur |
@@ -509,7 +509,8 @@ Aucune question ouverte.
 
 | Sujet | Décision |
 |---|---|
-| Rémunération dans le contrat | Le RH la voit et la rédige (exception de P6) |
+| Rémunération et RH | Le RH voit toute la rémunération (contrat, paie, bulletins) mais pas la banque ; il rédige la rémunération du contrat, seul le gestionnaire de paie saisit les éléments de paie (P6, décision 0003) |
+| Identifiants de l'employé | Liste définie par l'entreprise (libellé, obligatoire, affiché sur le bulletin), saisis par l'employé et vérifiés ; aucun numéro de pays figé (décision 0002) |
 | Application mobile | Marque blanche par entreprise |
 | Carte NFC | Payée par l'employé, hors système, 10 000 FCFA (émission et réémission) |
 | Versions | Tout dans la v1.0, développement module par module (8.5) |
@@ -566,7 +567,7 @@ Aucune question ouverte.
 | Taux CNPS / IRPP / CAC en retenues structurelles | Moteur de rubriques entièrement paramétrable, versions datées |
 | Paie : checklist puis génération | Circuit RH → gestionnaire de paie → direction, période verrouillée |
 | Tous modules inclus, paliers d'effectif | Socle + 5 modules + option Identité |
-| Admin voit tout | Bulletins et banque invisibles pour l'admin et le RH ; le RH ne voit que la rémunération contractuelle |
+| Admin voit tout | Bulletins et banque invisibles pour l'admin ; le RH voit la rémunération et les bulletins, pas la banque (décision 0003) |
 | App Flutter unique | App React Native en marque blanche par entreprise |
 
 ### 14.3 Exemple de paramétrage de paie tchadien (jeu de démonstration)

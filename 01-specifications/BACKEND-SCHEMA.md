@@ -176,6 +176,7 @@ Tables à une ligne (réglages).
 | `verifiable_block_settings` | `id`, `block` str, `proof_required` bool = 0 | **UQ** `block` ∈ `VerifiableBlock` ; justificatif exigé ou non, bloc par bloc, réglé par le RH |
 | `marital_statuses` | `id`, `code` str, `label` str, `is_active` bool = 1 | **UQ** `code` ; valeurs de départ créées dans la langue officielle (célibataire, marié, marié polygame, divorcé, veuf), modifiables, complétées par l'entreprise |
 | `national_id_types` | `id`, `code` str, `label` str, `is_active` bool = 1 | **UQ** `code` ; valeurs de départ (CNI, passeport, carte de séjour, autre), modifiables, complétées par l'entreprise |
+| `employee_identifier_types` | `id`, `code` str, `label` str, `is_required` bool = 0, `show_on_payslip` bool = 0, `is_active` bool = 1 | **UQ** `code` ; identifiants de l'employé définis par l'entreprise (sécurité sociale, fiscal…), aucun type livré (décision 0002) |
 
 ### 5.2 Organisation, sites et bornes
 
@@ -230,7 +231,7 @@ Principe (PRD P2, P3 ; TRD §10) : chaque **bloc** du dossier est une suite de *
 
 | Table | Colonnes métier | Vérifiée par |
 |---|---|---|
-| `employee_identity_versions` | `id`, `employee_id` → employees, `civility` str?, `first_name` str, `last_name` str, `birth_name` str?, `birth_date` date, `birth_place` str?, `gender` str, `nationality` str(2), `marital_status_id` → marital_statuses, `national_id_type_id` → national_id_types ?, `national_id_number` str?, `national_id_expires_at` date?, `cnps_number` str?, `niu` str?, `photo_path` str?, ⟨V⟩ | RH ; `civility` ∈ `Civility`, `gender` ∈ `Gender` ; nationalité ISO 3166-1 alpha-2 |
+| `employee_identity_versions` | `id`, `employee_id` → employees, `civility` str?, `first_name` str, `last_name` str, `birth_name` str?, `birth_date` date, `birth_place` str?, `gender` str, `nationality` str(2), `marital_status_id` → marital_statuses, `national_id_type_id` → national_id_types ?, `national_id_number` str?, `national_id_expires_at` date?, `photo_path` str?, ⟨V⟩ | RH ; `civility` ∈ `Civility`, `gender` ∈ `Gender` ; nationalité ISO 3166-1 alpha-2 |
 | `employee_contact_versions` | `id`, `employee_id` → employees, `personal_email` str?, `phone` str, `phone_alt` str?, `address` str?, `city` str?, `country` str(2)?, ⟨V⟩ | RH |
 
 **Blocs multiples** (une ligne « entité » + ses versions) :
@@ -240,6 +241,7 @@ Principe (PRD P2, P3 ; TRD §10) : chaque **bloc** du dossier est une suite de *
 | `employee_family_members` : `id`, `employee_id` → employees, `relationship` str, `current_version_id` uuid? | `employee_family_member_versions` : `id`, `family_member_id` → employee_family_members, `first_name` str, `last_name` str, `birth_date` date?, `gender` str?, `is_dependent` bool = 0, `marriage_date` date?, ⟨V⟩ | RH |
 | `employee_emergency_contacts` : `id`, `employee_id` → employees, `current_version_id` uuid? | `employee_emergency_contact_versions` : `id`, `emergency_contact_id` → employee_emergency_contacts, `full_name` str, `relationship_label` str, `phone` str, ⟨V⟩ | RH |
 | `employee_qualifications` : `id`, `employee_id` → employees, `current_version_id` uuid? | `employee_qualification_versions` : `id`, `qualification_id` → employee_qualifications, `kind` str, `title` str, `institution` str?, `field_of_study` str?, `level` str?, `obtained_on` date?, ⟨V⟩ | RH |
+| `employee_identifiers` : `id`, `employee_id` → employees, `employee_identifier_type_id` → employee_identifier_types, `current_version_id` uuid? | `employee_identifier_versions` : `id`, `employee_identifier_id` → employee_identifiers, `value` str, ⟨V⟩ | RH |
 | `employee_bank_accounts` : `id`, `employee_id` → employees, `is_primary` bool = 0, `current_version_id` uuid? | `employee_bank_account_versions` : `id`, `bank_account_id` → employee_bank_accounts, `method` str, `bank_id` → banks ?, `holder_name` enc, `account_number` enc?, `bank_code` enc?, `branch_code` enc?, `rib_key` enc?, `iban` enc?, `mobile_money_operator` str?, `mobile_money_number` enc?, ⟨V⟩ | **Gestionnaire de paie** |
 
 `relationship` ∈ `FamilyRelationship` ; `kind` ∈ `QualificationKind` ; `method` ∈ `PaymentChannel`. Un seul compte `is_primary` par employé (service).
@@ -539,7 +541,7 @@ Chaque transition est une méthode de service (TRD §11.2). Rôles abrégés : *
 | `VerificationStatus` | `a_verifier`, `verifiee`, `rejetee` |
 | `Civility` | `m`, `mme` |
 | `Gender` | `masculin`, `feminin` |
-| `VerifiableBlock` | `identite`, `coordonnees`, `famille`, `famille_a_charge`, `contact_urgence`, `diplome`, `banque` |
+| `VerifiableBlock` | `identite`, `coordonnees`, `famille`, `famille_a_charge`, `contact_urgence`, `diplome`, `identifiant`, `banque` |
 | `FamilyRelationship` | `conjoint`, `enfant` |
 | `QualificationKind` | `diplome`, `certificat`, `attestation`, `permis`, `autre` |
 | `DocumentUploader` | `employe`, `rh` |

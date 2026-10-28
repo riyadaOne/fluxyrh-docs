@@ -28,7 +28,7 @@ W10 livré.
 | Comptes des rubriques | Colonnes `debit_account`, `credit_account` ajoutées à `payroll_rubrics` (reporté de W09.1). Les comptes n'influencent pas le calcul : ils restent **modifiables sur une version active** (exception à l'immuabilité, journalisée), pour ne pas créer une version de paie à chaque correction comptable |
 | Plan comptable | **Aucun plan livré** (décision 0002) : le PAIE saisit ou importe (CSV) les comptes de paie de son référentiel (SYSCOHADA ou autre) ; le jeu de démonstration contient des comptes SYSCOHADA pour les tests |
 | Bilan social | Chaque entreprise **compose son bilan social** en choisissant ses indicateurs dans un **catalogue** (effectifs de fin d'année et moyen, par sexe, type, structure, tranche d'âge ; entrées et sorties par type ; ancienneté ; absentéisme ; heures sup ; masse salariale ; salaires moyens…), comme ses modèles de déclaration ; tables `social_report_templates` et `social_report_template_indicators` ajoutées au BACKEND SCHEMA |
-| Accès | PAIE et DIR (catégorie `remuneration_paie`) ; module non souscrit → 404 « module non souscrit », données conservées si le module est retiré |
+| Accès | PAIE et DIR ; le RH en lecture (déclarations, états, bilan social), décision 0003 ; module non souscrit → 404 « module non souscrit », données conservées si le module est retiré |
 
 ## 4. Statuts traversés
 
@@ -82,7 +82,7 @@ W10 livré.
 | Formats | CSV, XLSX, Sage conformes à leurs spécifications |
 | Déclarations | Lignes calculées exactes (rapprochement avec les états W09.8), saisie, transitions, dépôt |
 | Bilan social | Chaque indicateur du catalogue exact sur le jeu de démonstration ; modèle composé |
-| Non-fuite | RH, ADM, MGR : aucun accès aux montants |
+| Non-fuite | ADM, MGR : aucun accès aux montants |
 | Droits | `declarations`, `accounting` ; autre entreprise ; API |
 
 ## 7. Critères de sortie

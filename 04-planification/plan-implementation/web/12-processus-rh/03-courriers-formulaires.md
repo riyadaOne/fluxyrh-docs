@@ -32,7 +32,7 @@ W12.2 livré.
 |---|---|
 | Courriel d'un courrier | Le courrier peut contenir des champs sensibles : l'e-mail **ne joint jamais le PDF**, il porte un lien vers l'espace de l'employé (TRD §19) |
 | Champs sensibles dans un modèle | Règle de W08.1 : un auteur n'insère que les champs qu'il a le droit de lire. Le RH peut utiliser la rémunération contractuelle, pas la paie |
-| Attestation de salaire | Fondée sur le **salaire contractuel** (lisible par le RH). Une attestation fondée sur les bulletins (net, cumuls) serait préparée par le PAIE : chaque type de formulaire porte le **rôle qui le traite** (`rh` par défaut, `gestionnaire_paie` possible) ; colonne ajoutée à `form_types` |
+| Attestation de salaire | Le RH voit toute la rémunération (décision 0003) : il prépare les attestations fondées sur le contrat ou sur les bulletins. Chaque type de formulaire garde le **rôle qui le traite** (`rh` par défaut, `gestionnaire_paie` possible) ; colonne ajoutée à `form_types` |
 | PDF figés | Chaque PDF de courrier et de formulaire est figé avec son empreinte (`pdf_hash` ajouté aux tables concernées), comme les documents signés |
 | Signature de la direction | Un modèle de courrier ou un type de formulaire peut **exiger la signature de la direction** (colonnes `requires_direction_signature` et signataire désigné, ajoutées au BACKEND SCHEMA) : avant l'envoi de la campagne ou la remise du formulaire, le document attend la signature du directeur désigné dans sa boîte S-81 (signature dans le système, avec ou sans carte) ; sa signature graphique est apposée en W16 |
 | Passage à `Remis` | Au premier téléchargement par l'employé ; si le type exige un accusé, à l'accusé de réception (avec ou sans carte) |

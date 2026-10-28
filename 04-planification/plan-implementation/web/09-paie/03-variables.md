@@ -35,7 +35,7 @@ W09.2 livré.
 | Gel des données de temps | Après `Variables validées`, les corrections de journées, heures sup et congés touchant la période sont refusées (motif « variables validées ») ; pour les rouvrir, le RH ramène la période à `Ouverte` |
 | Retour à `Ouverte` | Non prévu par les spécifications. Proposition : le RH (ou le PAIE qui détecte une erreur) peut ramener la période à `Ouverte` tant qu'elle n'est pas `controlee` ; les bulletins calculés sont alors supprimés. BACKEND SCHEMA §6 mis à jour |
 | Variables d'avances | Source `avance` ajoutée par W09.7 ; **pas de variable issue des événements RH** en v1 (décision de W12.1) ; la source `saisie` permet dès W09.3 une variable manuelle motivée |
-| Montants dans les variables | Les variables sont des **quantités** (jours, minutes, nombre) ; la saisie d'un montant manuel est réservée au PAIE (W09.4), pour que le RH ne manipule aucune rémunération |
+| Montants dans les variables | Les variables sont des **quantités** (jours, minutes, nombre) ; le RH voit les montants de la paie, mais la saisie d'un montant reste réservée au PAIE (W09.4), pour séparer celui qui valide les présences de celui qui saisit la rémunération (décision 0003) |
 
 ## 5. Statuts traversés
 
@@ -92,7 +92,7 @@ W09.2 livré.
 | Variables | Collecte exacte, heures sup validées seulement, congés non payés, saisie manuelle motivée |
 | Gel | Correction de journée, d'heures sup, annulation de congé refusées après validation ; retour à `ouverte` |
 | Transitions | Interdites (ex. `ouverte` → `calculee`) |
-| Non-fuite | Le RH ne voit aucun montant dans S-52, S-53, S-55 |
+| Non-fuite | Un manager ou un ADM délégué ne voit aucun montant dans S-52, S-53, S-55 ; le RH voit sans saisir |
 | Droits | `payroll_variables`, `payroll_checklist`, `payroll_compute` ; autre entreprise ; API |
 
 ## 8. Critères de sortie

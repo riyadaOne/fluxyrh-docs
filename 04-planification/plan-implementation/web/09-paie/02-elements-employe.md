@@ -4,7 +4,7 @@ Dépôt : `FluxyRH-web/app/` (fluxyrh-w-app) · Dépend de : W09.1 · Suite : W0
 
 ## 1. Objet
 
-Rassembler, pour chaque employé, ce que la paie sait de lui avant toute période : **salaire de base** lu dans le contrat actif (jamais ressaisi), **rubriques fixes individuelles** (primes, indemnités, retenues permanentes) saisies par le gestionnaire de paie avec leurs dates, **fréquence de paie**. Ces montants sont des données sensibles de catégorie `remuneration_paie` : le RH ne les voit pas. À la fin de W09.2, chaque employé payable a une rémunération complète et cohérente avec le paramétrage en vigueur.
+Rassembler, pour chaque employé, ce que la paie sait de lui avant toute période : **salaire de base** lu dans le contrat actif (jamais ressaisi), **rubriques fixes individuelles** (primes, indemnités, retenues permanentes) saisies par le gestionnaire de paie avec leurs dates, **fréquence de paie**. Ces montants sont des données sensibles de catégorie `remuneration_paie` : le RH les voit sans pouvoir les saisir, l'admin ne les voit jamais (décision 0003). À la fin de W09.2, chaque employé payable a une rémunération complète et cohérente avec le paramétrage en vigueur.
 
 ## 2. Ce que le gestionnaire de paie reçoit, produit, transmet
 
@@ -53,13 +53,13 @@ Aucun cycle de vie : les affectations sont datées (`starts_on`, `ends_on`) ; un
 ### W09.2.3 — Écran S-51
 
 - S-51 `/employee-compensation` : liste des employés payables (types qui entrent dans la paie), fréquence, salaire de base, nombre de rubriques fixes, anomalies ; fiche de rémunération : rubriques en cours et historique, ajout, clôture, remplacement ; affectation groupée.
-- Onglet **Rémunération** de la fiche S-21, visible selon `FieldAccess` (PAIE, DIR).
+- Onglet **Rémunération** de la fiche S-21, visible selon `FieldAccess` (PAIE, DIR, RH en lecture).
 
-**Critère de fin** : un RH délégué sur l'écran `employee_compensation` voit la liste mais **aucun** montant (APPFLOW §6.5) ; l'ADM n'y a aucun accès.
+**Critère de fin** : le RH voit les montants sans pouvoir les modifier ; un manager délégué sur l'écran `employee_compensation` voit la liste mais **aucun** montant (APPFLOW §6.5) ; l'ADM n'y a aucun accès.
 
 ### W09.2.4 — Confidentialité
 
-- Tests de non-fuite sur S-51, la fiche, le journal d'audit, l'API et les exports : aucune valeur pour ADM, RH, MGR.
+- Tests de non-fuite sur S-51, la fiche, le journal d'audit, l'API et les exports : aucune valeur pour ADM et MGR ; le RH lit sans écrire.
 - Consultation d'une fiche de rémunération par un tiers journalisée (`sensitive_data_views`).
 
 ### W09.2.5 — API et documentation
@@ -75,7 +75,7 @@ Aucun cycle de vie : les affectations sont datées (`starts_on`, `ends_on`) ; un
 | Affectations | Rubrique individualisable ou non, dates, clôture, remplacement, groupée |
 | Lecture | Salaire de base du contrat actif à une date ; rubriques fixes à une date |
 | Anomalies | Sans contrat actif ; rubrique absente de la version |
-| Non-fuite | ADM, RH (même délégué), MGR : aucun montant |
+| Non-fuite | ADM, MGR (même délégués) : aucun montant ; RH : lecture seule |
 | Droits | `employee_compensation` ; autre entreprise ; API |
 
 ## 8. Critères de sortie

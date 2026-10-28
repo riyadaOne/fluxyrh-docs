@@ -26,7 +26,7 @@ W13 livré ; le moteur de W09.4 calcule un employé sans écrire (fonction de ca
 | Base d'une simulation | Une période **clôturée** de référence : ses contrats, rubriques fixes et variables ; le paramétrage utilisé est, au choix, celui de la période ou la version active actuelle |
 | Hypothèses | Hausse globale ou ciblée (structure, site, type) en % ou en montant sur le salaire de base ; rubrique ajoutée, retirée ou modifiée (dans une copie en mémoire du paramétrage) ; variation d'effectif par catégorie avec un salaire de référence (employés fictifs) ; hypothèses cumulées dans l'ordre |
 | Résultats | Par périmètre (total, structure, site, type) : effectif, brut, coût employeur, écart avec la référence ; chiffrés en base |
-| Accès | DIR et PAIE (`remuneration_paie`) ; consultation d'une simulation nominative journalisée (TRD §9.4) |
+| Accès | DIR et PAIE ; le RH en lecture (analyses et simulations), décision 0003 ; consultation d'une simulation nominative journalisée (TRD §9.4) |
 | Application d'un modèle | Action explicite du PAIE : aperçu des employés de la population et des changements, date d'effet, puis création ou clôture des rubriques fixes (W09.2) ; un nouvel employé de la population est **signalé** au PAIE (notification et mention dans S-51) avec la proposition d'appliquer le modèle ; rien n'est appliqué automatiquement |
 | Analyses | Calculées depuis les bulletins **publiés** ; agrégats en PHP (colonnes chiffrées) |
 
@@ -68,7 +68,7 @@ W13 livré ; le moteur de W09.4 calcule un employé sans écrire (fonction de ca
 | Simulations | Simulation neutre = référence ; chaque type d'hypothèse ; hypothèses cumulées ; employés fictifs ; aucune écriture réelle ; version de référence ou actuelle |
 | Comparaison | Écarts entre simulations |
 | Modèles | Population, aperçu, application datée, proposition à un nouvel employé |
-| Non-fuite | RH, ADM, MGR : aucun accès, même délégué ; journal des consultations |
+| Non-fuite | ADM, MGR : aucun accès, même délégués ; journal des consultations |
 | Module | Fermé sans le module |
 | Droits | `simulations`, `compensation_models` ; autre entreprise |
 

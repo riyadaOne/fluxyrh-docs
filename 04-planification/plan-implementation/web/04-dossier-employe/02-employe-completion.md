@@ -29,6 +29,7 @@ W04.1 livré. Paquet installé par le développeur : `intl-tel-input` (W04.2.3).
 
 | Sujet | Proposition |
 |---|---|
+| Identifiants de l'employé | Les numéros propres à un pays (sécurité sociale, fiscal…) ne sont plus des colonnes de l'identité : l'entreprise définit la liste des **types d'identifiant** (libellé, obligatoire, affiché sur le bulletin ; onglet Dossier de S-15), et l'employé les saisit comme un bloc multiple vérifié par le RH ; aucun type livré (décision 0002) ; tables `employee_identifier_types`, `employee_identifiers`, `employee_identifier_versions` |
 | Valeurs de l'identité | `Civility` (`m`, `mme`) et `Gender` (`masculin`, `feminin`) sont des enums. La **situation matrimoniale** et le **type de pièce d'identité** sont des **listes paramétrées par l'entreprise** (tables `marital_statuses`, `national_id_types` : code, libellé, actif), créées au provisionnement avec des valeurs de départ (célibataire, marié, marié polygame, divorcé, veuf ; CNI, passeport, carte de séjour, autre) libellées dans la langue officielle ; l'entreprise les modifie et en ajoute (onglet Dossier de S-15). Les colonnes deviennent `marital_status_id`, `national_id_type_id`. Nationalité et pays en ISO 3166-1 alpha-2 |
 | Justificatif obligatoire | **Paramétrable par l'entreprise**, bloc par bloc (identité, coordonnées, membre de la famille, membre à charge, contact d'urgence, diplôme, banque), dans un onglet **Dossier** de S-15 (RH) ; table `verifiable_block_settings` (`block`, `proof_required`) ajoutée au BACKEND SCHEMA ; tant que rien n'est réglé, aucun justificatif n'est exigé |
 | Justificatif bancaire | Un RIB est une donnée bancaire : le RH ne doit pas le voir. Ajout à `document_types` d'une colonne `sensitive_category` (nulle ou `bancaire`) ; type système `justificatif_bancaire` créé au provisionnement ; tout document de ce type est lu par `FieldAccess`. BACKEND SCHEMA §5.4 mis à jour |
@@ -70,10 +71,11 @@ La vérification (`verifiee`, `rejetee`) est construite en W04.3.
 - Migrations `employee_identity_versions`, `employee_contact_versions` ; pointeurs `current_identity_version_id`, `current_contact_version_id` ajoutés à `employees` (sans clé SQL, BACKEND SCHEMA §9 point 4).
 - Formulaires : identité (photo recadrée, pièce d'identité en justificatif), coordonnées (téléphone international).
 
-### W04.2.4 — Blocs multiples : famille, contacts d'urgence, diplômes
+### W04.2.4 — Blocs multiples : famille, contacts d'urgence, diplômes, identifiants
 
 - Migrations des entités et de leurs versions (BACKEND SCHEMA §5.4).
 - Ajout, modification (nouvelle version), retrait d'une entité (version de retrait soumise à vérification, la valeur vérifiée restant en vigueur jusque-là).
+- Identifiants de l'employé : migrations `employee_identifier_types`, `employee_identifiers`, `employee_identifier_versions` ; types gérés dans l'onglet Dossier de S-15 ; étape de l'assistant ; un identifiant obligatoire manquant compte dans la complétude (W04.3).
 
 ### W04.2.5 — Banque
 

@@ -107,7 +107,7 @@ La révocation n'efface ni l'identité ni l'historique ; elle supprime les sessi
 
 ### W02.7 — Champs sensibles
 
-- `App\Support\FieldAccess::canRead(SensitiveField, ?Employee)` et `canWrite()` : matrice **codée** du TRD §9.1 (catégories `remuneration_contractuelle`, `remuneration_paie`, `bancaire`), jamais délégable ; l'admin entreprise n'a jamais accès ; « employé concerné » branché quand le dossier existe (W04).
+- `App\Support\FieldAccess::canRead(SensitiveField, ?Employee)` et `canWrite()` : matrice **codée** du TRD §9.1 (catégories `remuneration_contractuelle`, `remuneration_paie`, `bancaire`), jamais délégable ; l'admin entreprise n'a jamais accès ; le RH lit `remuneration_contractuelle` et `remuneration_paie` mais n'écrit que la première et ne voit jamais `bancaire` (décision 0003) ; « employé concerné » branché quand le dossier existe (W04).
 - `ActivityLogger` : valeurs avant / après d'un champ sensible stockées chiffrées et affichées selon `FieldAccess`.
 - Outil de test de **non-fuite** : assertion réutilisable qui vérifie qu'une réponse web, une réponse API ou un export ne contient aucune valeur sensible d'un jeu de données ; chaque module qui stocke un champ sensible l'applique à ses écrans, exports et points d'API.
 - Le journal des consultations sensibles (`sensitive_data_views`, TRD §9.4) est créé avec la première donnée sensible (coordonnées bancaires, W04.2).

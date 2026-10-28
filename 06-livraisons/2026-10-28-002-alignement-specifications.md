@@ -6,7 +6,7 @@
 
 ## Fichiers créés
 
-Aucun.
+- `03-architecture/decisions/2026-10-28-0003-rh-voit-la-remuneration.md` : le RH voit toute la rémunération (lecture seule pour la paie), jamais la banque ; modifie P6.
 
 ## Fichiers modifiés
 
@@ -29,4 +29,5 @@ Aucun : les spécifications et le plan disent désormais la même chose.
 ## Notes pour la suite
 
 - Prochaine étape : proposition de W00 (amorçage technique).
-- Point signalé, en attente de décision : identifiants propres à certains pays au niveau de l'**employé** (n° CNPS et NIU dans l'identité, n° CNPS sur le bulletin).
+- Identifiants de l'employé (Q56) : liste de types définie par l'entreprise, saisis par l'employé et vérifiés ; colonnes `cnps_number` et `niu` retirées de l'identité.
+- Rémunération et RH (Q57 à Q59, décision 0003) : PRD P6, TRD §9, APPFLOW, UX/UI, BACKEND SCHEMA et plan (W02.7, W04.2, W09.2 à W09.8, W11, W12.3, W13, W14) mis à jour.

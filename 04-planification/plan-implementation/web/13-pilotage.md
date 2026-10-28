@@ -68,7 +68,7 @@ W12 livré. Paquet installé par le développeur : ApexCharts (npm).
 
 | Domaine | Cas |
 |---|---|
-| Widgets | Défauts par rôle, personnalisation, périmètre du manager, widget sensible absent pour RH et ADM |
+| Widgets | Défauts par rôle, personnalisation, périmètre du manager, widget de rémunération absent pour ADM et MGR, aucune donnée bancaire dans un widget |
 | Rapports | Exactitude sur le jeu de démonstration (effectifs, turnover, absentéisme, heures sup, masse salariale), filtres, exports |
 | États | Colonnes fermées, champ sensible refusé ou masqué, partage, limite de lignes |
 | Jetons | Secret affiché une fois, révocation, expiration, jeu non autorisé, jeu sensible créé par l'ADM refusé, créateur ayant perdu ses droits |

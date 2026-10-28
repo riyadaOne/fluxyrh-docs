@@ -322,16 +322,16 @@ S'y ajoutent des **contrôles de périmètre** dans les services : un manager n'
 | Catégorie | Exemples | Lecture autorisée |
 |---|---|---|
 | `remuneration_contractuelle` | Salaire de base et avantages du contrat | Gestionnaire de paie, direction, RH, employé concerné |
-| `remuneration_paie` | Rubriques individuelles, bulletins, cumuls, avances, simulations nominatives | Gestionnaire de paie, direction, employé concerné |
+| `remuneration_paie` | Rubriques individuelles, bulletins, cumuls, avances, simulations nominatives | Gestionnaire de paie, direction, **RH (lecture seule)**, employé concerné |
 | `bancaire` | Banque, titulaire, numéro de compte, RIB, mobile money | Gestionnaire de paie, direction, employé concerné |
 
-L'admin entreprise n'a **jamais** accès à ces catégories (P6). La matrice est **codée** (enum + `FieldAccess::canRead/canWrite`), pas paramétrable par l'entreprise.
+L'admin entreprise n'a **jamais** accès à ces catégories, un manager non plus (P6). Le RH lit `remuneration_paie` sans l'écrire et ne voit jamais `bancaire` (décision 0003). La matrice est **codée** (enum + `FieldAccess::canRead/canWrite`), pas paramétrable par l'entreprise.
 
 ### 9.2 Contrôle applicatif **[OBLIGATOIRE]**
 
 - Toute lecture d'un champ sensible passe par `FieldAccess` : composants Livewire, ressources API (`when(FieldAccess::canRead(...))`), exports, rapports, états personnalisés, champs de fusion des contrats et courriers, notifications, journal d'audit.
 - Les agrégats (masse salariale par structure) ne sont visibles que des rôles autorisés sur `remuneration_paie`.
-- **Test de non-fuite** : pour chaque écran, export et point d'API, un test vérifie qu'un admin entreprise et un RH (pour `remuneration_paie` et `bancaire`) n'obtiennent aucune valeur sensible.
+- **Test de non-fuite** : pour chaque écran, export et point d'API, un test vérifie qu'un admin entreprise et un manager n'obtiennent aucune valeur sensible, et qu'un RH n'obtient aucune donnée `bancaire` ni ne peut écrire de `remuneration_paie`.
 
 ### 9.3 Chiffrement au repos
 
@@ -359,6 +359,7 @@ Les données du dossier saisies par l'employé (état civil, coordonnées, pièc
 - Le dossier pointe vers la **version en vigueur** de chaque donnée (pointeurs `current_*_version_id`, Backend Schema §5.4), mise à jour uniquement par `VerifiableDataService::verify()`.
 - `VerifiableDataService` : `submit()` (propriétaire), `verify()` / `reject()` (vérificateur habilité, jamais le propriétaire lui-même), notifications, journal. Le vérificateur dépend de la nature et du propriétaire : RH en général, gestionnaire de paie pour la banque, **direction** pour les données d'un RH (sa banque reste vérifiée par le gestionnaire de paie) et pour la banque d'un gestionnaire de paie.
 - La paie, les contrats, les documents et les rapports lisent **toujours** la version en vigueur.
+- Les identifiants de l'employé (sécurité sociale, fiscal…) ne sont pas des colonnes figées : l'entreprise en définit les types (`employee_identifier_types`), l'employé les saisit comme un bloc multiple vérifié.
 - `CompletenessService` calcule la complétude à partir des pièces obligatoires configurées par type d'employé (F-EMP-09) et expose `isComplete()` utilisé par les services de congés et de formulaires types (et affiché comme signalement dans le suivi des paiements).
 
 ---

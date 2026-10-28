@@ -102,7 +102,7 @@ W09.3 livré.
 | Job | Lots, reprise après échec d'un lot, reconnexion à l'entreprise |
 | Contrôle | Écarts, anomalies bloquantes et non bloquantes, retour à `calculee` |
 | Montants ponctuels | Chiffrés, bornés à la période, recalcul de l'employé |
-| Non-fuite | RH, ADM, MGR : aucun montant (écran, API, journal, notifications) |
+| Non-fuite | ADM, MGR : aucun montant (écran, API, journal) ; aucun montant dans une notification, quel que soit le destinataire |
 | Performance | 200 employés < 1 min (MySQL) |
 | Droits | `payroll_compute`, `payroll_control` ; autre entreprise |
 

@@ -228,7 +228,7 @@ L'admin ne voit **jamais** de salaire, de bulletin ni de coordonnée bancaire.
 
 | Web | 📱 |
 |---|---|
-| `/employees` + fiche (S-21), `/invitations/employees` (S-20), `/verifications` (S-22), `/org-chart` (S-23), `/work-schedules` (S-30), `/holidays` (S-31), `/attendance` (S-32), `/overtime` (S-34 validation), `/leave-types` (S-35), `/leave-requests` (S-36), `/contracts` (S-40), `/contract-clauses` (S-41 bibliothèque de blocs), `/nfc-cards/handover` (S-18), `/payroll-periods/{id}/variables` (S-52), `/announcements` (S-70), modules : `/hr-events` (S-71), `/workflows` (S-72), `/letters` (S-73), `/form-requests` (S-74), `/evaluations` (S-75), `/skills` (S-76), `/recruitment-imports` (S-77) | Validations (données, congés, heures sup) · Employés (recherche, scan de carte) · Cartes (remise) · Moi |
+| `/employees` + fiche (S-21, rémunération et bulletins en lecture), `/employee-compensation` (S-51, lecture), `/invitations/employees` (S-20), `/verifications` (S-22), `/org-chart` (S-23), `/work-schedules` (S-30), `/holidays` (S-31), `/attendance` (S-32), `/overtime` (S-34 validation), `/leave-types` (S-35), `/leave-requests` (S-36), `/contracts` (S-40), `/contract-clauses` (S-41 bibliothèque de blocs), `/nfc-cards/handover` (S-18), `/payroll-periods/{id}/variables` (S-52), `/announcements` (S-70), modules : `/hr-events` (S-71), `/workflows` (S-72), `/letters` (S-73), `/form-requests` (S-74), `/evaluations` (S-75), `/skills` (S-76), `/recruitment-imports` (S-77) | Validations (données, congés, heures sup) · Employés (recherche, scan de carte) · Cartes (remise) · Moi |
 
 ### 4.5 Gestionnaire de paie
 
@@ -676,7 +676,7 @@ Les écrans marqués **délégable** sont des valeurs de l'enum `Permission` (BA
 | S-58 Banques | `/banks` | PAIE | ✅ `bank_settings` | Socle |
 | S-59 Avances et prêts | `/advances` | PAIE | ✅ `advances` | Socle |
 
-Les écrans de paie restent soumis aux champs sensibles : déléguer `payroll_variables` à un rôle ne lui montre aucun montant.
+Les écrans de paie restent soumis aux champs sensibles : déléguer un écran de paie à un rôle qui n'a pas droit à la rémunération (admin, manager) ne lui montre aucun montant. Le RH voit les montants sans les saisir, et ne voit jamais la banque (décision 0003).
 
 ### 6.6 Direction et pilotage
 
@@ -751,4 +751,5 @@ S-60 Accueil et assistant de complétion · S-61 Mon dossier · S-62 Mes documen
 | Paiements, archives | Hors système ; FluxyRH enregistre les paiements (§5.10, §5.20) |
 | Workflows | Lancement proposé au RH, jamais automatique (§5.12) |
 | Vérification | Une demande à la fois, jamais groupée |
+| Rémunération et RH | Le RH voit la rémunération et les bulletins, en lecture, jamais la banque (décision 0003) |
 | Ouverture des périodes de paie | La **dernière étape de la checklist** d'une période est « Ouvrir la période suivante » : à la clôture, le système la **propose** au gestionnaire de paie. L'entreprise peut activer l'**ouverture automatique** par fréquence ; la période suivante est alors ouverte par le système dès la clôture (§5.10) |

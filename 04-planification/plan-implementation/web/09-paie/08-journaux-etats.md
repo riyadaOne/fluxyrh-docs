@@ -1,4 +1,4 @@
-# W09.8 — Paie · Journaux et états (PAIE, DIR)
+# W09.8 — Paie · Journaux et états (PAIE, DIR, RH en lecture)
 
 Dépôt : `FluxyRH-web/app/` (fluxyrh-w-app) · Dépend de : W09.6 · Clôt le module W09
 
@@ -40,7 +40,7 @@ W09.6 livré (W09.7 n'est pas un prérequis).
 ### W09.8.2 — Écrans et exports
 
 - Onglet **États** de la page de période S-53 : journal de paie et états de cotisations ; filtres structure, site, type d'employé.
-- Exports (§4), journalisés avec leur empreinte ; réservés aux rôles autorisés sur `remuneration_paie` (PAIE, DIR).
+- Exports (§4), journalisés avec leur empreinte ; réservés aux rôles autorisés sur `remuneration_paie` (PAIE, DIR, RH en lecture).
 
 ### W09.8.3 — API et documentation
 
@@ -56,7 +56,7 @@ W09.6 livré (W09.7 n'est pas un prérequis).
 | Exactitude | Totaux du journal égaux à la somme des bulletins ; états de cotisations égaux aux lignes ; rapprochement avec les bulletins dorés |
 | Statut | Provisoire dès `calculee`, définitif après `cloturee` |
 | Exports | XLSX, CSV, PDF ; empreinte ; journal |
-| Non-fuite | RH, ADM, MGR : aucun accès, même par délégation d'écran |
+| Non-fuite | ADM, MGR : aucun accès, même par délégation d'écran |
 | Droits | Autre entreprise ; API |
 
 ## 7. Critères de sortie
