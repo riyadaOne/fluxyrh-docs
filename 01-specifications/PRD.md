@@ -181,7 +181,7 @@ Une personne n'a **qu'une identité** (base générale) mais un **rattachement p
 | F-ADM-02 | Rattachement `Invité` → `Actif` → `Suspendu` → `Révoqué` ; la révocation n'efface ni l'identité ni l'historique ; l'accès expire automatiquement à la date de fin | Socle |
 | F-ADM-03 | Matrice des droits par écran (comme UnivPlus) : écrans par défaut par rôle, délégation d'un écran à un autre rôle, exclusion d'une personne ; écrans d'un module non souscrit grisés | Socle |
 | F-ADM-04 | Droits **par donnée** : les champs sensibles (salaire, rémunération, banque) suivent P6, quelles que soient les délégations d'écran | Socle |
-| F-ADM-05 | Politique de mot de passe paramétrable : longueur, complexité, expiration ; 2FA activable et imposable par rôle | Socle |
+| F-ADM-05 | Politique de mot de passe paramétrable : longueur, complexité, expiration (12 caractères et complexité par défaut) ; 2FA activée par chaque utilisateur, jamais imposée par l'entreprise | Socle |
 | F-ADM-06 | Liste des utilisateurs connectés (web et mobile) et déconnexion forcée d'une session | Socle |
 | F-ADM-07 | Configuration : identité de l'entreprise (raison sociale, logo, adresse, **identifiants légaux paramétrables** : libellé et valeur, ex. RCCM, NIU, n° CNPS, SIRET, avec le choix de ceux affichés sur les documents), format du matricule, langue officielle, fuseau horaire, devise | Socle |
 | F-ADM-08 | Journal d'audit en lecture seule : utilisateur, action, donnée, valeurs avant / après, IP, appareil ; filtres et export | Socle |
@@ -223,7 +223,7 @@ Une personne n'a **qu'une identité** (base générale) mais un **rattachement p
 | F-EMP-06 | Taux de complétude du dossier par employé et pour l'entreprise | Socle |
 | F-EMP-07 | Cycle de l'employé : `Invité` → `Actif` → `En sortie` → `Sorti` ; un employé sorti garde son dossier en lecture seule ; son accès se coupe à la date de sortie ; pas de sortie sans résiliation du contrat actif | Socle |
 | F-EMP-08 | Cumuls annuels consultables par l'employé (brut, net, cotisations, impôt) | Socle |
-| F-EMP-09 | **Pièces obligatoires paramétrées par l'entreprise** (par type d'employé) ; tant qu'elles ne sont pas toutes `Vérifiées` : pas de demande de congé, pas de formulaire type (attestation), signalement dans le suivi des paiements ; pointage et paie restent possibles | Socle |
+| F-EMP-09 | **Pièces obligatoires paramétrées par l'entreprise** (par type d'employé) ; tant qu'elles ne sont pas toutes `Vérifiées` : par défaut, pas de demande de congé, pas de formulaire type (attestation), et le bulletin calculé ne peut pas être marqué « Payé » ; l'entreprise peut lever chacun de ces blocages, l'écran lui expliquant les risques (décision 0004) ; le pointage reste possible | Socle |
 | F-EMP-10 | Relances automatiques de l'employé (notification, e-mail) et indicateur de complétude pour le RH | Socle |
 
 ### 7.5 Cartes NFC employé
@@ -306,7 +306,7 @@ Une personne n'a **qu'une identité** (base générale) mais un **rattachement p
 
 | ID | Exigence | Offre |
 |---|---|---|
-| F-TAL-01 | Évaluations 360° : campagnes, évaluateurs choisis par le RH (un par un ou par groupe), poids par type d'évaluateur, anonymat paramétré par campagne, une réponse par évaluateur, clôture bloquée tant qu'une réponse manque, rapport, évaluation clôturée immuable | Talents |
+| F-TAL-01 | Évaluations 360° : campagnes, évaluateurs choisis par le RH (un par un ou par groupe), poids par type d'évaluateur, anonymat paramétré par campagne, une réponse par évaluateur, règle de clôture choisie à la création de la campagne (bloquée tant qu'une réponse manque, ou permise après la date de fin), rapport, évaluation clôturée immuable | Talents |
 | F-TAL-02 | Référentiel de compétences, compétences par employé, recherche par compétence | Talents |
 | F-TAL-03 | Parcours de carrière et historique des postes | Talents |
 | F-TAL-04 | Import des candidats retenus depuis **Jobyflow (API)** : invitation pré-remplie, puis données proposées dans le dossier, que l'employé confirme lui-même | Talents |
@@ -510,6 +510,7 @@ Aucune question ouverte.
 | Sujet | Décision |
 |---|---|
 | Rémunération et RH | Le RH voit toute la rémunération (contrat, paie, bulletins) mais pas la banque ; il rédige la rémunération du contrat, seul le gestionnaire de paie saisit les éléments de paie (P6, décision 0003) |
+| Souple par défaut | Une règle qui ne touche pas à la sécurité devient un réglage de l'entreprise, qui est informée des risques quand elle relâche une protection ; signataires de contrat pré-remplis ; « Valider la sélection » sans argent en jeu ; clôture des évaluations réglée par campagne ; 2FA activée par l'utilisateur (décision 0004) |
 | Identifiants de l'employé | Liste définie par l'entreprise (libellé, obligatoire, affiché sur le bulletin), saisis par l'employé et vérifiés ; aucun numéro de pays figé (décision 0002) |
 | Application mobile | Marque blanche par entreprise |
 | Carte NFC | Payée par l'employé, hors système, 10 000 FCFA (émission et réémission) |
@@ -528,7 +529,7 @@ Aucune question ouverte.
 | Automatismes | Limités : le système notifie et propose ; restent automatiques l'activation et la fin des contrats, la sortie et la fin d'accès à leur date, l'effet des événements à leur date, l'ouverture de la période suivante (option), le constat d'absence et les relances |
 | Prix | Grille 8.3, −10 % en annuel |
 | Avances et prêts | Circuit employé → paie → direction, activable par l'entreprise (F-PAY-10) |
-| Dossier incomplet | Pièces obligatoires paramétrées ; blocage congés, attestations, virements ; relances (F-EMP-09, F-EMP-10) |
+| Dossier incomplet | Pièces obligatoires paramétrées ; blocage par défaut des congés, des attestations et du marquage « Payé », chacun levable par l'entreprise avec l'explication des risques ; relances (F-EMP-09, F-EMP-10, décision 0004) |
 | Borne de site | Fournie par l'entreprise, fonctionne hors ligne (F-ORG-03, F-ORG-06) |
 | Export comptable | Sage 100 Comptabilité + format générique ; plan comptable saisi ou importé par l'entreprise (F-CNF-04) |
 | Rétention, disponibilité, performance | NF-09 à NF-13 |

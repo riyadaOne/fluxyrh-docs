@@ -55,7 +55,7 @@ W06.2 livré.
 - Migration `attendance_corrections`.
 - `App\Services\Tenant\AttendanceCorrectionService::correct(day, in, out, status, reason)` : manager direct (ou délégation), jamais sa propre journée, dans le délai réglé (§4), motif obligatoire ; enregistre les valeurs avant et après, marque la journée `is_corrected`, recalcule minutes, retard et départ anticipé à partir des heures corrigées, recalcule les minutes réalisées des heures sup établies (§4) ; journal ; notification à l'employé.
 - Création d'une journée absente du calcul (oubli complet de pointage) par la même correction.
-- Pointages de secours (W06.2) : le manager les valide (la journée est recalculée) ou les refuse avec un motif, la photo affichée à côté du matricule ; même délai et même périmètre que les corrections.
+- Pointages de secours (W06.2) : le manager les valide (la journée est recalculée) ou les refuse avec un motif, la photo affichée à côté du matricule ; même délai et même périmètre que les corrections ; sélection multiple « Valider la sélection » (décision 0004).
 
 **Critère de fin** : une correction sur un pointage refusé (carte perdue, borne en panne) donne une journée juste ; un manager ne peut corriger ni sa journée ni celle d'une personne hors de son équipe.
 

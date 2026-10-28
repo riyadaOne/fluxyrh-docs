@@ -35,7 +35,7 @@ W09.5 livré.
 |---|---|
 | Paiements hors système | FluxyRH **ne produit aucun fichier de virement** : les tables `bank_transfer_formats`, `bank_transfer_format_columns`, `bank_transfer_exports` et l'écran S-58 « formats » sont retirés (BACKEND SCHEMA, APPFLOW, TRD §16.3 et PRD F-PAY-08 mis à jour). Le PAIE paie par ses moyens habituels, puis enregistre le résultat dans S-57 |
 | Informations utiles au paiement | S-57 montre au PAIE, pour chaque bulletin, le net à payer et le compte principal **vérifié** de l'employé (ou l'absence de compte vérifié), pour qu'il puisse payer hors système ; aucune action de paiement n'est faite par FluxyRH |
-| Dossier incomplet | Ne bloque plus de virement (il n'y en a plus dans FluxyRH) : S-57 signale seulement « dossier incomplet » et « compte non vérifié » à côté du bulletin. F-EMP-09 mis à jour : le dossier incomplet bloque les congés et les formulaires types |
+| Dossier incomplet | Par défaut, le bulletin d'un employé au dossier incomplet est calculé et publié, mais **ne peut pas être marqué « Payé »** (F-EMP-09, décision 0004) ; S-57 l'affiche avec la liste des pièces manquantes ; l'entreprise peut lever ce blocage (W04.3, avec l'explication du risque) |
 | Correction après clôture | Impossible sur la période : un bulletin publié n'est jamais régénéré. La correction passe par la période suivante (montant ponctuel de rappel ou de retenue, W09.4) |
 | Réimpression | Toujours le **même** PDF figé (même empreinte), jamais un nouveau rendu |
 | Paiement en échec | `echec` → `paye` permis (nouvelle tentative) avec motif ; `paye` est définitif |
@@ -78,7 +78,7 @@ W09.5 livré.
 
 ### W09.6.5 — Enregistrement des paiements
 
-- `App\Services\Payroll\PaymentRecordService` : marquer `paye` (moyen, date, référence facultative) ou `echec` (motif), un par un ou par sélection ; journal.
+- `App\Services\Payroll\PaymentRecordService` : marquer `paye` (moyen, date, référence facultative) ou `echec` (motif), un par un ou par sélection ; refus de `paye` pour un dossier incomplet si l'entreprise bloque le paiement (`CompletenessService::blocks()`) ; journal.
 - S-57 `/payments` : bulletins d'une période par statut de paiement ; net, compte principal vérifié, signalements « dossier incomplet » et « compte non vérifié » ; enregistrement individuel et groupé ; export de la liste (XLSX, CSV) pour le suivi interne, réservé aux rôles autorisés sur `bancaire` (PAIE, DIR) et journalisé.
 
 **Critère de fin** : tous les bulletins d'une période peuvent être marqués payés en une action ; un paiement `paye` ne peut plus changer.

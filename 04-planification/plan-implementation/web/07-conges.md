@@ -62,7 +62,7 @@ W06 livré.
 - `App\Services\Tenant\LeaveService` :
   - `countDays(employee, type, start, end, halfDays)` : jours ouvrés du planning de l'employé (W06.1) hors jours fériés, ou jours calendaires selon le type ; demi-journées ;
   - `balance(employee, type, date)` : à la volée (§3), jamais stocké ;
-  - contrôles de demande : dossier complet si le type l'exige (`CompletenessService::isComplete()`), solde suffisant, justificatif, durée maximale, chevauchement, employé `actif`.
+  - contrôles de demande : dossier complet si l'entreprise bloque les congés et si le type l'exige (`CompletenessService::blocks()`), solde suffisant, justificatif, durée maximale, chevauchement, employé `actif`.
 
 **Critère de fin** : jeu de cas (semaine avec jour férié, demi-journées, planning à temps partiel, jours calendaires, embauche en cours d'année, acquisition mensuelle) calculé exactement.
 
@@ -82,7 +82,7 @@ W06 livré.
 ### W07.6 — Approbation (manager)
 
 - `LeaveService::approveByManager()`, `refuseByManager(reason)` : décideur (W07.4), jamais sa propre demande.
-- S-36 `/leave-requests` côté manager (aussi sous `/team`) : demandes à décider avec le solde, le calendrier de l'équipe sur la période et les autres absents ce jour-là.
+- S-36 `/leave-requests` côté manager (aussi sous `/team`) : demandes à décider avec le solde, le calendrier de l'équipe sur la période et les autres absents ce jour-là ; sélection multiple « Approuver la sélection » (décision 0004).
 - Calendrier d'équipe (F-ABS-04) dans S-24 : absences prévues et validées de l'équipe directe et indirecte, par semaine et par mois.
 
 ### W07.7 — Validation (RH)

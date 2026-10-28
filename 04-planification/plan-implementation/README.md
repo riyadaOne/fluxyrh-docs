@@ -213,7 +213,7 @@ Le web livre le serveur de toutes les fonctions, mais certaines ne peuvent être
 | F-EMP-06 Taux de complétude | W04.3 |
 | F-EMP-07 Cycle de l'employé | W04.1, W12.2 |
 | F-EMP-08 Cumuls annuels | W09.6, E07 |
-| F-EMP-09 Pièces obligatoires et blocages | W04.3 (complétude), W07, W12.3 (blocages), W09.6 (signalement dans les paiements) |
+| F-EMP-09 Pièces obligatoires et blocages | W04.3 (complétude, réglages), W07, W12.3, W09.6 (blocages) |
 | F-EMP-10 Relances | W04.3 |
 | F-NFC-01 à 06 Cartes | W05, E01, E03, B03, C01 |
 | F-NFC-07 Design de la carte | W05 (neutre), W16 |

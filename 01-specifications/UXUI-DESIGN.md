@@ -576,5 +576,6 @@ Proposées par Claude **module par module**, avant le développement de chaque m
 | Applications | Entreprise sur Android et iOS ; Borne et Console sur Android |
 | Éditeur de texte | Tiptap dans un composant maison `x-rich-editor` (pas de licence Flux Pro) |
 | Vérification | Une demande à la fois, jamais par lot |
+| Sélection multiple | « Valider la sélection » dans les listes de congés, d'heures sup et de pointages de secours ; jamais pour un montant (décision 0004) |
 | Rémunération et RH | Le RH voit la rémunération et les bulletins en lecture ; la banque reste masquée pour lui (décision 0003) |
 | Documents | Rédigés dans la langue officielle de l'entreprise, identifiants légaux choisis par elle |

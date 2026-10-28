@@ -13,7 +13,7 @@ Ouvrir l'espace de l'entreprise à ses utilisateurs : invitation et rattachement
 | F-ADM-01, 02 | Invitation (comptes admin sans dossier), rattachement, fin d'accès |
 | F-ADM-03 | Matrice des droits, délégations, exclusions, écrans de module grisés |
 | F-ADM-04 | `FieldAccess` et enum `SensitiveField` (mécanique ; appliquée par chaque module qui stocke un champ sensible) |
-| F-ADM-05 | Politique de mot de passe, 2FA imposée par rôle |
+| F-ADM-05 | Politique de mot de passe ; 2FA activée par chaque utilisateur, jamais imposée par l'entreprise (décision 0004) |
 | F-ADM-06 | Utilisateurs connectés, déconnexion forcée |
 | F-ADM-07 | Configuration : identité de l'entreprise, langue officielle, fuseau, devise (onglets matricule, pointage, relances ajoutés par W04 et W06) |
 | F-ADM-08 | Écran du journal d'audit, filtres, export |
@@ -89,12 +89,12 @@ La révocation n'efface ni l'identité ni l'historique ; elle supprime les sessi
 
 ### W02.5 — Politique de mot de passe et 2FA
 
-- Migrations d'entreprise : `password_policies` (une ligne, valeurs par défaut du BACKEND SCHEMA §5.1), `two_factor_required_roles`.
+- Migrations d'entreprise : `password_policies` (une ligne, valeurs par défaut du BACKEND SCHEMA §5.1 : 12 caractères et complexité).
 - `App\Services\Tenant\PasswordPolicyService` : règles de l'entreprise ; nouveau mot de passe conforme à la politique **la plus stricte** des entreprises actives de la personne ; historique des N derniers ; expiration.
-- Middleware `EnforcePasswordPolicy` : changement imposé (S-07) si le mot de passe a expiré ou n'est pas conforme ; configuration de la 2FA imposée si le rôle l'exige.
+- Middleware `EnforcePasswordPolicy` : changement imposé (S-07) si le mot de passe a expiré ou n'est pas conforme . La 2FA n'est jamais imposée : chaque utilisateur l'active dans ses paramètres (décision 0004).
 - Onglet « Mots de passe » de la Configuration (W02.9).
 
-**Critère de fin** : un mot de passe non conforme ou expiré impose le changement ; une personne rattachée à deux entreprises reçoit la règle la plus stricte ; la 2FA imposée à un rôle bloque l'accès jusqu'à sa configuration.
+**Critère de fin** : un mot de passe non conforme ou expiré impose le changement ; une personne rattachée à deux entreprises reçoit la règle la plus stricte .
 
 ### W02.6 — Droits par écran
 
@@ -129,7 +129,7 @@ La révocation n'efface ni l'identité ni l'historique ; elle supprime les sessi
 - S-10 `/configuration` (navlist UX/UI §5.3), onglets de W02 :
   - **Entreprise** : raison sociale, nom commercial, logo (disque privé), adresse, ville, téléphone, e-mail, secteur, et **identifiants légaux** (liste paramétrable : libellé, valeur, affiché ou non sur les documents, ordre ; table `company_legal_identifiers` ajoutée au BACKEND SCHEMA, colonnes `rccm`, `niu`, `cnps_employer_number` retirées de `company_profile`) ;
   - **Langue, fuseau, devise** : modifient `companies` par un service (devise modifiable jusqu'au verrouillage de W09.1) ;
-  - **Mots de passe** : politique et rôles soumis à la 2FA (W02.5).
+  - **Mots de passe** : politique de mot de passe (W02.5).
 - Les onglets Matricule (W04.1), Relances (W04.3), Pointage (W06.1) sont ajoutés par leurs modules.
 - Tout changement journalisé avec valeurs avant / après.
 
@@ -176,7 +176,7 @@ La révocation n'efface ni l'identité ni l'historique ; elle supprime les sessi
 |---|---|
 | Invitation | Compte neuf, compte existant, jeton invalide, expiré, annulé, réutilisé ; expiration automatique ; renvoi ; invitation du premier admin par la plateforme |
 | Rattachement | Toutes les transitions, transitions interdites, effet immédiat sur sessions et jetons, fin d'accès |
-| Connexion | Mot de passe, passkey, 2FA, 2FA imposée, mot de passe expiré, entreprise d'un autre rattachement, abonnement suspendu, limites de débit |
+| Connexion | Mot de passe, passkey, 2FA activée par l'utilisateur, mot de passe expiré, entreprise d'un autre rattachement, abonnement suspendu, limites de débit |
 | Mot de passe | Règles, politique la plus stricte, historique, expiration |
 | Droits | Rôle par défaut, délégation, exclusion, module manquant prioritaire, au web et à l'API |
 | Champs sensibles | Matrice complète de `FieldAccess` ; l'ADM n'a jamais accès |

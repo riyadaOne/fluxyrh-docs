@@ -69,7 +69,7 @@ W12.2 livré.
 
 - Migrations `form_types` (avec le rôle qui traite), `form_requests` (avec `pdf_hash`).
 - Formulaires et modèles de courrier par défaut (§4) créés à l'activation du module dans la langue officielle.
-- `App\Services\Tenant\FormRequestService` : `request()` (dossier complet si le type l'exige, `CompletenessService`), `prepare()` (PDF figé), `refuse(reason)`, `deliver()` (§4), signature de la direction quand le type l'exige (élément dans S-81) ; notifications.
+- `App\Services\Tenant\FormRequestService` : `request()` (dossier complet si l'entreprise bloque les attestations et si le type l'exige, `CompletenessService::blocks()`), `prepare()` (PDF figé), `refuse(reason)`, `deliver()` (§4), signature de la direction quand le type l'exige (élément dans S-81) ; notifications.
 - S-67 `/me/requests`, onglet Formulaires : demande, suivi, téléchargement ; S-74 `/form-requests` (RH, PAIE selon le type) : demandes à traiter, aperçu, préparer, refuser ; S-74, onglet Types.
 
 ### W12.3.5 — API et documentation

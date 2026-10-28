@@ -281,7 +281,7 @@ Espace borne : `ResolveCompany` → `EnsureSupportedAppVersion` → `auth:sanctu
 
 ### 7.2 Politique de mot de passe (F-ADM-05)
 
-- Paramètres par entreprise : longueur minimale, classes de caractères exigées, expiration en jours, historique des N derniers mots de passe interdits, 2FA imposée par rôle.
+- Paramètres par entreprise : longueur minimale, classes de caractères exigées, expiration en jours, historique des N derniers mots de passe interdits. La 2FA est activée par chaque utilisateur, jamais imposée par l'entreprise (décision 0004).
 - Le mot de passe appartient à l'identité (`users`) mais la politique dépend de l'entreprise : à la connexion dans une entreprise, le mot de passe est contrôlé contre **sa** politique ; s'il n'y est pas conforme ou a expiré, le changement est imposé avant l'accès. Le nouveau mot de passe doit satisfaire la politique la plus stricte parmi les entreprises actives de la personne.
 - Hachage des anciens mots de passe pour l'historique (`password_histories`).
 
@@ -360,7 +360,7 @@ Les données du dossier saisies par l'employé (état civil, coordonnées, pièc
 - `VerifiableDataService` : `submit()` (propriétaire), `verify()` / `reject()` (vérificateur habilité, jamais le propriétaire lui-même), notifications, journal. Le vérificateur dépend de la nature et du propriétaire : RH en général, gestionnaire de paie pour la banque, **direction** pour les données d'un RH (sa banque reste vérifiée par le gestionnaire de paie) et pour la banque d'un gestionnaire de paie.
 - La paie, les contrats, les documents et les rapports lisent **toujours** la version en vigueur.
 - Les identifiants de l'employé (sécurité sociale, fiscal…) ne sont pas des colonnes figées : l'entreprise en définit les types (`employee_identifier_types`), l'employé les saisit comme un bloc multiple vérifié.
-- `CompletenessService` calcule la complétude à partir des pièces obligatoires configurées par type d'employé (F-EMP-09) et expose `isComplete()` utilisé par les services de congés et de formulaires types (et affiché comme signalement dans le suivi des paiements).
+- `CompletenessService` calcule la complétude à partir des pièces obligatoires configurées par type d'employé (F-EMP-09) et expose `isComplete()` et `blocks(employee, action)`, utilisés par les services de congés, de formulaires types et d'enregistrement des paiements, selon les blocages choisis par l'entreprise (`incomplete_file_settings`, tous actifs par défaut).
 
 ---
 

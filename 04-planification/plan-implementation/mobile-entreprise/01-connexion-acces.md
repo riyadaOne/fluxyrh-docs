@@ -24,7 +24,7 @@ E00 livré.
 | Sujet | Proposition |
 |---|---|
 | Mot de passe expiré ou non conforme | L'app affiche « Changez votre mot de passe sur le web » avec le lien, comme le prévoit l'APPFLOW §7 |
-| 2FA imposée non configurée | Même renvoi vers le web pour la configurer |
+| 2FA | Activée par l'utilisateur lui-même (paramètres web), jamais imposée ; si elle est activée, le code est demandé à la connexion |
 | Démarrage hors ligne | Jeton présent et profil en cache de moins de 7 jours → onglets avec le bandeau « Hors ligne » ; sinon « Connexion au réseau nécessaire » (APPFLOW §3.3) |
 | Verrouillage | Proposé après la première connexion, activable et désactivable dans le Profil ; demandé au retour dans l'app après un délai (par défaut 5 minutes, réglable par l'utilisateur) |
 | Connexion carte + PIN | Activée par l'utilisateur dans le Profil (carte active posée sur le téléphone + PIN de la carte) ; la lecture NFC est construite ici avec le composant `NfcZone`, réutilisé ensuite |

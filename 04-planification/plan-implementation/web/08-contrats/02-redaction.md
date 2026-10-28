@@ -31,7 +31,7 @@ W08.1 livré.
 | Blocs proposés | À la création, `ClauseLibraryService::proposedFor()` (W08.1) : blocs présélectionnés insérés, autres blocs proposés dans un panneau ; le RH peut aussi prendre n'importe quel bloc de la bibliothèque. La colonne `contracts.contract_template_id` est retirée (BACKEND SCHEMA) |
 | Bloc libre | Écrit dans le contrat ; bouton « Enregistrer dans la bibliothèque » qui en fait un nouveau bloc (brouillon à publier, W08.1) |
 | Langue | Celle de l'entreprise au moment de la rédaction, enregistrée sur le contrat (`locale`) |
-| Signataires | Le RH **ajoute les signataires** et leur ordre : l'employé (toujours) et un ou plusieurs signataires de l'entreprise, choisis parmi les rattachements actifs qui ont un dossier et une carte (direction par défaut). `ContractParty` devient `employe` / `entreprise` ; modifiables jusqu'à la dernière signature : ajouter, retirer ou réordonner un signataire annule les signatures déjà faites, comme une modification du contrat. BACKEND SCHEMA §5.8 et §7 mis à jour |
+| Signataires | **Pré-remplis** (décision 0004) : l'employé (toujours) et le **signataire de l'entreprise par défaut**, réglé une fois dans la Configuration (onglet Contrats, table `contract_settings`) ; le RH ne les change, n'en ajoute ou ne modifie leur ordre que si besoin, parmi les rattachements actifs qui ont un dossier. `ContractParty` devient `employe` / `entreprise` ; modifiables jusqu'à la dernière signature : ajouter, retirer ou réordonner un signataire annule les signatures déjà faites, comme une modification du contrat. BACKEND SCHEMA §5.8 et §7 mis à jour |
 | Deux PDF | Chaque signataire signe **l'empreinte du document qu'il a lu**, et le PDF final porte le bloc des signatures : ajout de `unsigned_pdf_path` et `unsigned_pdf_hash` (PDF à signer, figé à l'envoi) ; `pdf_path` / `pdf_hash` = PDF signé final (W08.3, T-13). Chaque modification en `À signer` crée une **nouvelle version** du PDF à signer ; les précédentes sont conservées (table `contract_signing_versions` : numéro, chemin, empreinte, date). BACKEND SCHEMA §5.8 mis à jour |
 | Préalables à l'envoi | Employé `actif`, identité vérifiée (les champs du contrat viennent des valeurs vérifiées), tous les champs résolus, au moins un signataire de l'entreprise, dates cohérentes avec la nature (fin obligatoire pour CDD, stage, saisonnier ; période d'essai avant la fin) |
 | Modification pendant la signature | Les discussions entre les parties se font **hors système**. Tant que toutes les signatures ne sont pas réunies, le contrat reste `À signer` et le RH le modifie **autant de fois que nécessaire**, sans changer son statut : chaque modification refige les valeurs et produit une nouvelle version du PDF à signer ; les signatures déjà apposées sur une version précédente restent dans l'historique mais ne valent plus, et chaque signataire signe la nouvelle version. BACKEND SCHEMA §8 mis à jour |
@@ -57,6 +57,7 @@ W08.1 livré.
 
 - Migrations `contracts` (sans `amends_contract_id` ni colonnes de fin, ajoutées en W08.4), `contract_blocks`, `contract_merge_values`, `contract_signatories`.
 - Models, factories (états par statut).
+- Migration `contract_settings` et onglet **Contrats** de la Configuration : signataire de l'entreprise par défaut (décision 0004).
 
 ### W08.2.3 — Service de rédaction
 
@@ -96,7 +97,7 @@ W08.1 livré.
 | Domaine | Cas |
 |---|---|
 | Rédaction | Blocs présélectionnés insérés, blocs proposés, ajout d'un bloc quelconque, bloc libre assaini et enregistré dans la bibliothèque, réordonnancement, langue officielle |
-| Signataires | Ajout, ordre, signataire sans carte ou sans dossier refusé, au moins un signataire de l'entreprise |
+| Signataires | Pré-remplissage depuis la Configuration, ajout, ordre, signataire sans dossier refusé, au moins un signataire de l'entreprise |
 | Envoi | Préalables (§4), gel des valeurs, PDF figé et empreinte, notification |
 | Immuabilité | Toute modification refusée à partir de `signe` ; changement du dossier ou de la bibliothèque sans effet sur un contrat envoyé tant que le RH ne le modifie pas |
 | Modification en `À signer` | Nouvelle version du PDF à signer et des valeurs, ancienne version conservée, signatures déjà apposées invalidées, statut inchangé |

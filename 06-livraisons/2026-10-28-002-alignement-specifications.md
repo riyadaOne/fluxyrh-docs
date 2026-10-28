@@ -7,6 +7,7 @@
 ## Fichiers créés
 
 - `03-architecture/decisions/2026-10-28-0003-rh-voit-la-remuneration.md` : le RH voit toute la rémunération (lecture seule pour la paie), jamais la banque ; modifie P6.
+- `03-architecture/decisions/2026-10-28-0004-souple-par-defaut.md` : principe « souple par défaut, durcissable par l'entreprise », règles de sécurité fixes, allègements retenus.
 
 ## Fichiers modifiés
 
@@ -30,4 +31,5 @@ Aucun : les spécifications et le plan disent désormais la même chose.
 
 - Prochaine étape : proposition de W00 (amorçage technique).
 - Identifiants de l'employé (Q56) : liste de types définie par l'entreprise, saisis par l'employé et vérifiés ; colonnes `cnps_number` et `niu` retirées de l'identité.
+- Souple par défaut (décision 0004) : signataires de contrat pré-remplis (`contract_settings`), « Valider la sélection » sans argent en jeu, clôture des évaluations réglée par campagne, 2FA activée par l'utilisateur (`two_factor_required_roles` retirée), blocages du dossier incomplet réglables (congés, attestations, marquage « Payé », `incomplete_file_settings`).
 - Rémunération et RH (Q57 à Q59, décision 0003) : PRD P6, TRD §9, APPFLOW, UX/UI, BACKEND SCHEMA et plan (W02.7, W04.2, W09.2 à W09.8, W11, W12.3, W13, W14) mis à jour.

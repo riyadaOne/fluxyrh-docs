@@ -24,7 +24,7 @@ Règle absolue : **personne ne vérifie ses propres données** (BACKEND SCHEMA �
 | F-EMP-04 | Liste de travail, justificatif à côté de la valeur, comparaison, règles du vérificateur |
 | F-EMP-05 (alertes) | Pièces déposées par le RH, alerte avant expiration |
 | F-EMP-06 | Taux de complétude par employé et pour l'entreprise |
-| F-EMP-09 | Complétude par pièces obligatoires ; `isComplete()` utilisé par les modules qui bloquent |
+| F-EMP-09 | Complétude par pièces obligatoires ; blocages réglables (congés, attestations, paiement) ; `isComplete()` utilisé par les modules qui bloquent |
 | F-EMP-10 | Relances de l'employé, indicateur pour le RH |
 | F-COM-01 (in-app) | Notifications in-app et cloche web (le push est en W10) |
 | T-10 | Seule la version vérifiée fait foi |
@@ -83,7 +83,8 @@ W04.2 livré.
 
 - `App\Services\Tenant\CompletenessService` : pièces obligatoires du type d'employé, toutes `verifiee` et non expirées ; `isComplete(employee)`, `missing(employee)`, taux par employé et pour l'entreprise ; calcul à la volée, mis en cache par requête.
 - Jauge et pièces manquantes dans l'en-tête de la fiche (UX/UI §6.3), dans S-60 et dans la liste des employés (filtre « incomplet ») ; taux de l'entreprise sur le tableau de bord du RH.
-- `isComplete()` est **exposé** ici et **appliqué** par les congés (W07) et les formulaires types (W12.3) ; il est aussi affiché comme signalement dans les paiements (W09.6).
+- Migration `incomplete_file_settings` (`block_leave`, `block_forms`, `block_payment`, tous vrais par défaut) et réglage dans l'onglet **Dossier** de S-15 ; décocher un blocage affiche l'explication du risque et demande une confirmation, journalisée (décision 0004).
+- `isComplete()` et `blocks(employee, action)` sont **exposés** ici et **appliqués** par les congés (W07), les formulaires types (W12.3) et l'enregistrement des paiements (W09.6).
 
 **Critère de fin** : un dossier devient complet à la vérification de sa dernière pièce obligatoire et redevient incomplet à son expiration.
 
@@ -123,7 +124,7 @@ W04.2 livré.
 | Vérificateur | Employé → RH ; banque → PAIE ; RH → DIR ; banque d'un RH → PAIE ; banque d'un PAIE → DIR ; propriétaire jamais ; entreprise sans direction |
 | Vérification | Pointeur mis à jour, rejet avec motif, version rejetée sans effet, transitions interdites (`verifiee` → tout) |
 | Non-fuite | Listes, panneau, notifications, journal : aucune valeur bancaire pour RH et ADM |
-| Complétude | Pièces obligatoires par type, expiration, taux employé et entreprise, `isComplete()` |
+| Complétude | Pièces obligatoires par type, expiration, taux employé et entreprise, `isComplete()`, blocages réglables avec confirmation du risque |
 | Relances | Fréquences, expiration, une seule relance par échéance, langue officielle |
 | Notifications | Destinataire, lien, lecture, aucun contenu sensible |
 | Droits | Permissions `verifications`, `bank_verifications`, `approvals` ; délégation, exclusion ; autre entreprise ; API |
@@ -139,6 +140,6 @@ W04.2 livré.
 | Élément | Module |
 |---|---|
 | Accusé de réception d'un document | W05 |
-| Blocage des congés et formulaires sur dossier incomplet ; signalement dans les paiements | W07, W12.3, W09.6 |
+| Application des blocages : congés, formulaires, marquage « Payé » | W07, W12.3, W09.6 |
 | Notifications push | W10 (serveur), E08 (app) |
 | Vérifications dans l'app (RH, PAIE, DIR) | E02 |

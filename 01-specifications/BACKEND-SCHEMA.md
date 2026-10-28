@@ -167,13 +167,14 @@ Tables à une ligne (réglages).
 | `company_legal_identifiers` | `id`, `label` str, `value` str, `show_on_documents` bool = 1, `rank` smallint | Identifiants légaux paramétrables (RCCM, NIU, n° CNPS, SIRET…), aucun libellé imposé (décision 0002) |
 | `employee_number_settings` | `id`, `format` str = `EMP-{annee}-{sequentiel}`, `sequence_padding` tinyint = 4, `next_sequence` uint = 1 | Matricule (F-EMP-01) |
 | `password_policies` | `id`, `min_length` tinyint = 12, `require_uppercase` bool = 1, `require_lowercase` bool = 1, `require_digit` bool = 1, `require_symbol` bool = 0, `expiry_days` smallint?, `history_count` tinyint = 0 | F-ADM-05 |
-| `two_factor_required_roles` | `id`, `role` str | **UQ** `role` ; 2FA imposée à ces rôles |
 | `clocking_settings` | `id`, `kiosk_silence_alert_minutes` smallint = 30, `code_step_seconds` smallint = 30, `offline_window_hours` smallint = 48, `phone_clocking_enabled` bool = 1, `direction_inversion_seconds` smallint = 10, `half_day_enabled` bool = 0, `half_day_min_percent` dec(5,2)?, `full_day_min_percent` dec(5,2)?, `shift_window_before_minutes` smallint = 240, `shift_window_after_minutes` smallint = 480, `correction_window_days` smallint?, `emergency_monthly_limit` tinyint = 0 | TRD §12 ; valeurs techniques réglables par l'entreprise ; `correction_window_days` nul = jusqu'à la clôture de la paie ; `emergency_monthly_limit` = 0 : pointage de secours désactivé |
 | `advance_policies` | `id`, `enabled` bool = 0, `max_percent_of_net` dec(5,2)?, `max_installments` tinyint?, `min_seniority_months` tinyint?, `max_open_per_employee` tinyint = 1, `deduction_rubric_code` str? | F-PAY-10 ; `deduction_rubric_code` = rubrique de retenue des échéances |
 | `card_design_settings` | `id`, `structure_index` tinyint = 0, `show_photo` bool = 1 | `0` = design neutre (socle) ; `1` à `20` = designs du module Identité (`config/cards.php`), aux couleurs de la charte active (F-NFC-07, F-IDN-04, UX/UI §13.3) |
 | `payroll_frequency_settings` | `id`, `frequency` str, `is_used` bool = 0, `auto_open_next_period` bool = 0 | **UQ** `frequency` ; ouverture automatique de la période suivante à la clôture (APPFLOW §5.10) |
 | `reminder_settings` | `id`, `incomplete_file_every_days` tinyint = 7, `document_expiry_notice_days` smallint = 30, `contract_end_notice_days` smallint = 30 | F-EMP-05, F-EMP-10, F-CTR-03 |
+| `contract_settings` | `id`, `default_company_signatory` ⇢ uc ? | Une ligne : signataire de l'entreprise pré-rempli sur chaque nouveau contrat (décision 0004) |
 | `verifiable_block_settings` | `id`, `block` str, `proof_required` bool = 0 | **UQ** `block` ∈ `VerifiableBlock` ; justificatif exigé ou non, bloc par bloc, réglé par le RH |
+| `incomplete_file_settings` | `id`, `block_leave` bool = 1, `block_forms` bool = 1, `block_payment` bool = 1 | Une ligne : ce que bloque un dossier incomplet (congés, attestations, marquage « Payé ») ; lever un blocage demande une confirmation après l'explication du risque, journalisée (décision 0004) |
 | `marital_statuses` | `id`, `code` str, `label` str, `is_active` bool = 1 | **UQ** `code` ; valeurs de départ créées dans la langue officielle (célibataire, marié, marié polygame, divorcé, veuf), modifiables, complétées par l'entreprise |
 | `national_id_types` | `id`, `code` str, `label` str, `is_active` bool = 1 | **UQ** `code` ; valeurs de départ (CNI, passeport, carte de séjour, autre), modifiables, complétées par l'entreprise |
 | `employee_identifier_types` | `id`, `code` str, `label` str, `is_required` bool = 0, `show_on_payslip` bool = 0, `is_active` bool = 1 | **UQ** `code` ; identifiants de l'employé définis par l'entreprise (sécurité sociale, fiscal…), aucun type livré (décision 0002) |
@@ -414,7 +415,7 @@ Les **cumuls annuels** (F-EMP-08) sont calculés à partir des bulletins publié
 
 | Table | Colonnes | Contraintes / notes |
 |---|---|---|
-| `evaluation_campaigns` | `id`, `title` str, `period_label` str, `starts_on` date, `ends_on` date, `status` str = `brouillon`, `created_by` ⇢ uc | ∈ `EvaluationCampaignStatus` |
+| `evaluation_campaigns` | `id`, `title` str, `period_label` str, `starts_on` date, `ends_on` date, `status` str = `brouillon`, `closure_requires_all_responses` bool = 1, `created_by` ⇢ uc | ∈ `EvaluationCampaignStatus` |
 | `evaluation_campaign_weights` | `id`, `evaluation_campaign_id` → evaluation_campaigns, `evaluator_type` str, `weight` tinyint, `is_anonymous` bool = 0, `min_anonymous_responses` tinyint = 2 | **UQ** (`evaluation_campaign_id`, `evaluator_type`) ; somme = 100 (service) ; anonymat paramétré par type d'évaluateur |
 | `evaluation_criteria` | `id`, `evaluation_campaign_id` → evaluation_campaigns, `rank` smallint, `label` str, `description` text?, `scale_max` tinyint = 5 | |
 | `evaluations` | `id`, `evaluation_campaign_id` → evaluation_campaigns, `employee_id` → employees, `status` str = `en_cours`, `final_score` dec(5,2)?, `closed_at` ts? | **UQ** (`evaluation_campaign_id`, `employee_id`) ; ∈ `EvaluationStatus` ; immuable une fois clôturée |
@@ -624,7 +625,7 @@ Les libellés affichés viennent de `label()` (traduits) ; une valeur stockée n
 | Seule la dernière version `verifiee` d'un bloc fait foi ; le pointeur `current_*_version_id` ne bouge qu'à la vérification | `VerifiableDataService` |
 | Le vérificateur n'est jamais le propriétaire de la donnée ; la banque est vérifiée par PAIE ; les données d'un RH (sauf sa banque, vérifiée par PAIE) et la banque d'un PAIE sont vérifiées par DIR | `VerifiableDataService` |
 | Un `admin_entreprise` peut n'avoir aucune ligne `employees` ; tout autre rôle en a une | `InvitationService` |
-| Dossier incomplet (pièces obligatoires non `verifiee` ou expirées) : pas de congé (si `requires_complete_file`), pas de formulaire type ; signalé dans le suivi des paiements | `CompletenessService`, services concernés |
+| Dossier incomplet (pièces obligatoires non `verifiee` ou expirées) : selon `incomplete_file_settings` (tous actifs par défaut), pas de congé (si le type a `requires_complete_file`), pas de formulaire type, bulletin non marquable « Payé » | `CompletenessService`, services concernés |
 | Un seul contrat `actif` par employé ; contrat modifiable en `brouillon` et `a_signer` (chaque modification crée une version à signer et annule les signatures) ; un contrat `signe` est figé (PDF + empreinte) | `ContractService` |
 | Une seule carte `active` par employé | `NfcCardService` |
 | Une seule `employment_periods` ouverte par employé | `EmployeeService` |

@@ -126,7 +126,7 @@ flowchart TD
 ### 3.2 Connexion web entreprise
 
 1. `https://{slug}.fluxyrh.app/login` : e-mail + mot de passe, ou passkey.
-2. Si la 2FA est activée **ou imposée à son rôle** : code TOTP ou code de récupération ; si elle est imposée mais pas encore configurée, configuration obligatoire avant d'aller plus loin.
+2. Si la personne a activé la 2FA : code TOTP ou code de récupération. La 2FA n'est jamais imposée par l'entreprise.
 3. Si le mot de passe a expiré ou n'est pas conforme à la politique de l'entreprise : **changement obligatoire** (S-07).
 4. À **chaque requête** : rattachement actif, date de fin d'accès non dépassée, abonnement actif ; sinon déconnexion avec message.
 5. Arrivée sur `/dashboard` du rôle ; un EMP sans autre rôle arrive sur `/me`.
@@ -316,7 +316,7 @@ flowchart TD
     V -- Vérifiée --> OK["[Vérifiée] → devient la valeur en vigueur<br/>notification à l'employé"]
     V -- Rejetée --> KO["[Rejetée] + motif → l'employé corrige<br/>nouvelle version « À vérifier »"]
     OK --> CP{Toutes les pièces obligatoires<br/>vérifiées ?}
-    CP -- Oui --> COMP["Dossier complet<br/>congés et attestations débloqués"]
+    CP -- Oui --> COMP["Dossier complet<br/>congés, attestations et paiement débloqués"]
     CP -- Non --> E
 ```
 
@@ -431,7 +431,7 @@ Hors ligne, la demande part en file et s'affiche « en attente d'envoi » ; le c
 flowchart TD
     A[RH · S-40 Nouveau contrat<br/>employé, nature du contrat] --> B[Blocs proposés selon la nature et le type d'employé<br/>présélectionnés insérés · autres blocs, blocs libres]
     B --> C["Conditions et champs {{…}}<br/>(dates, poste, salaire de base, horaires)"]
-    C --> SG[RH ajoute les signataires et leur ordre<br/>employé + signataires de l'entreprise]
+    C --> SG[Signataires pré-remplis : employé + signataire par défaut<br/>RH les change seulement si besoin]
     SG --> D["[Brouillon] modifiable · aperçu PDF"]
     D --> E["Envoyer pour signature<br/>valeurs et PDF à signer figés · [À signer]"]
     E --> P[Copies imprimées pour la signature manuscrite]
@@ -725,7 +725,7 @@ S-60 Accueil et assistant de complétion · S-61 Mon dossier · S-62 Mes documen
 | Hors ligne | — | Bandeau ; cache ; pointages et demandes en file ; refus motivés affichés |
 | Pointage refusé (code expiré, carte inactive, site non autorisé, appareil inconnu, rejeu, fenêtre dépassée, période clôturée) | Visible par le manager (S-33) | Message explicite à l'employé |
 | Borne révoquée ou suspendue | — | Écran « Borne désactivée, contactez l'administrateur » |
-| Dossier incomplet | Congés et attestations bloqués avec la liste des pièces manquantes ; signalé dans le suivi des paiements | Idem |
+| Dossier incomplet | Selon les réglages de l'entreprise (tous actifs par défaut) : congés, attestations et marquage « Payé » bloqués, avec la liste des pièces manquantes | Idem |
 | Carte perdue ou oubliée | Pointage de secours validé ou refusé par le manager (S-33) | 🖥 « Je n'ai pas ma carte » : matricule + photo, statut « à valider » |
 | Période de paie clôturée | Actions désactivées sur ses données | Refus 422 |
 | Checklist non satisfaite | Étapes bloquantes ❌ listées, action désactivée | — |
@@ -751,5 +751,6 @@ S-60 Accueil et assistant de complétion · S-61 Mon dossier · S-62 Mes documen
 | Paiements, archives | Hors système ; FluxyRH enregistre les paiements (§5.10, §5.20) |
 | Workflows | Lancement proposé au RH, jamais automatique (§5.12) |
 | Vérification | Une demande à la fois, jamais groupée |
+| Souple par défaut | Signataires de contrat pré-remplis ; « Valider la sélection » pour les congés, heures sup et pointages de secours (jamais pour un montant) ; clôture des évaluations réglée par campagne ; 2FA activée par l'utilisateur (décision 0004) |
 | Rémunération et RH | Le RH voit la rémunération et les bulletins, en lecture, jamais la banque (décision 0003) |
 | Ouverture des périodes de paie | La **dernière étape de la checklist** d'une période est « Ouvrir la période suivante » : à la clôture, le système la **propose** au gestionnaire de paie. L'entreprise peut activer l'**ouverture automatique** par fréquence ; la période suivante est alors ouverte par le système dès la clôture (§5.10) |

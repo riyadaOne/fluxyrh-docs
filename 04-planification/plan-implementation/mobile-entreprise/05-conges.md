@@ -35,7 +35,7 @@ E04 livré.
 
 ### E05.2 — Manager
 
-- Onglet **Équipe**, demandes à décider (y compris « en remplacement de… » pendant l'absence d'un manager), solde, calendrier de l'équipe sur la période, approuver, refuser avec motif ; calendrier d'équipe par semaine et par mois.
+- Onglet **Équipe**, demandes à décider (y compris « en remplacement de… » pendant l'absence d'un manager), solde, calendrier de l'équipe sur la période, approuver (une demande ou la sélection), refuser avec motif ; calendrier d'équipe par semaine et par mois.
 
 ### E05.3 — RH
 

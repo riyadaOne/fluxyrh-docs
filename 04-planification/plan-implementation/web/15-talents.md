@@ -25,7 +25,7 @@ W14 livré. Le contrat d'interface Jobyflow (TRD §16.1) est **transmis à l'éq
 |---|---|
 | Désignation des évaluateurs | Le RH **choisit tous les évaluateurs à la main**, individuellement ou par groupe (structure, site, équipe d'un manager), et indique le type de chacun (auto, manager, pair, collaborateur) |
 | Anonymat | **Paramétré par campagne** : pour chaque type d'évaluateur, réponses nominatives ou anonymes, et nombre minimum de réponses pour afficher une moyenne anonyme ; colonnes ajoutées à `evaluation_campaign_weights` |
-| Réponses manquantes à la clôture | La clôture est **bloquée** tant que tous les évaluateurs n'ont pas répondu ; le RH relance, ou retire un évaluateur défaillant avec un motif (journalisé) |
+| Réponses manquantes à la clôture | **Réglé à la création de chaque campagne** (décision 0004) : soit la clôture est bloquée tant que tous les évaluateurs n'ont pas répondu, soit elle est permise après la date de fin avec les poids recalculés sur les réponses reçues ; dans les deux cas, le RH relance ou retire un évaluateur défaillant avec un motif (journalisé). Colonne `evaluation_campaigns.closure_requires_all_responses` |
 | Visibilité du rapport | Employé évalué, son manager, RH, direction |
 | Évaluation des compétences | Par le RH et le manager (`assessed_by`) ; l'employé consulte les siennes ; écart avec le niveau requis par son poste |
 | Parcours de carrière | Définis par le RH ; la position d'un employé est déduite de son historique d'affectation (W04.1, W12.1) ; prochaine étape « accessible » si la durée minimale est atteinte, à titre indicatif |
@@ -51,7 +51,7 @@ W14 livré. Le contrat d'interface Jobyflow (TRD §16.1) est **transmis à l'éq
 ### W15.2 — Évaluations 360°
 
 - Migrations `evaluation_campaigns`, `evaluation_campaign_weights`, `evaluation_criteria`, `evaluations`, `evaluation_evaluators`, `evaluation_answers`.
-- `App\Services\Talent\EvaluationService` : campagne (critères, échelle, poids dont la somme = 100), employés, évaluateurs choisis par le RH (§3), ouverture (notifications), réponse unique par évaluateur, relances, retrait motivé d'un évaluateur, clôture bloquée tant qu'une réponse manque (score pondéré, immuabilité), rapport selon l'anonymat paramétré (§3).
+- `App\Services\Talent\EvaluationService` : campagne (critères, échelle, poids dont la somme = 100), employés, évaluateurs choisis par le RH (§3), ouverture (notifications), réponse unique par évaluateur, relances, retrait motivé d'un évaluateur, clôture selon le réglage de la campagne (score pondéré, immuabilité), rapport selon l'anonymat paramétré (§3).
 - S-75 `/evaluations` (RH) : campagnes, avancement ; `/evaluations/to-fill` (évaluateurs) ; `/me/evaluations` (rapports de la personne) ; onglet de la fiche S-21.
 
 ### W15.3 — Compétences et carrières
@@ -79,7 +79,7 @@ W14 livré. Le contrat d'interface Jobyflow (TRD §16.1) est **transmis à l'éq
 
 | Domaine | Cas |
 |---|---|
-| Évaluations | Poids = 100, réponse unique, soumission hors campagne ouverte refusée, clôture bloquée avec une réponse manquante, retrait motivé, immuabilité, score pondéré, anonymat paramétré |
+| Évaluations | Poids = 100, réponse unique, soumission hors campagne ouverte refusée, clôture bloquée ou permise selon le réglage de la campagne, retrait motivé, immuabilité, score pondéré, anonymat paramétré |
 | Compétences | Niveaux, écarts avec le poste, recherche |
 | Carrières | Position déduite de l'historique, durée minimale |
 | Jobyflow | Faux fournisseur : import, déduplication par identifiant externe, accusé, pièces, erreurs réseau et nouvelles tentatives, clé chiffrée |
