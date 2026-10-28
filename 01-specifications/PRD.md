@@ -70,7 +70,7 @@ FluxyRH est vendu **par abonnement à l'entreprise**, sous forme d'un **socle** 
 
 ### 3.2 Le contexte d'usage (déterminant pour les choix produit)
 
-- **Tchad d'abord, puis zone CEMAC** : la paie doit être **entièrement paramétrable** (cotisations, impôts, primes créés par l'entreprise), aucun barème codé en dur.
+- **Toute entreprise, quel que soit son pays** (premiers clients au Tchad et en zone CEMAC) : la paie doit être **entièrement paramétrable** (cotisations, impôts, primes créés par l'entreprise), aucun barème codé en dur.
 - **Connectivité variable** : l'app mobile fonctionne hors ligne pour le pointage, la consultation et les demandes.
 - **Trois langues** : français, arabe (droite à gauche), anglais.
 - **Android majoritaire** ; employés de terrain parfois sans smartphone NFC → **borne de site** comme alternative.
@@ -97,7 +97,7 @@ FluxyRH est vendu **par abonnement à l'entreprise**, sous forme d'un **socle** 
 2. **Pointage infalsifiable à distance** : QR dynamique du site + carte NFC personnelle.
 3. **Carte NFC employé** : badge vérifiable publiquement, connexion, signature de contrats et d'accusés de réception.
 4. **Confidentialité des salaires** : ni l'admin ni le RH ne voient les salaires et les coordonnées bancaires.
-5. **Paie 100 % paramétrable** : rubriques, cotisations et barèmes créés par l'entreprise, pré-paramétrage Tchad fourni.
+5. **Paie 100 % paramétrable** : rubriques, cotisations et barèmes créés par l'entreprise, aucun paramétrage de pays imposé.
 6. **Cloisonnement strict** : une base de données par entreprise.
 
 ---
@@ -167,7 +167,7 @@ Une personne n'a **qu'une identité** (base générale) mais un **rattachement p
 | F-PLT-03 | Activation / désactivation des modules par entreprise ; chaque changement est journalisé | Plateforme |
 | F-PLT-04 | Tableau de bord plateforme : entreprises, effectifs, activité, revenu récurrent | Plateforme |
 | F-PLT-05 | File des cartes NFC à encoder, encodage dans l'app Console | Plateforme |
-| F-PLT-06 | Sauvegarde technique quotidienne de chaque base ; l'entreprise peut demander chaque mois une **archive complète** de ses données, préparée et mise à disposition par la plateforme | Plateforme |
+| F-PLT-06 | Sauvegarde technique quotidienne de chaque base ; une archive des données demandée par l'entreprise (mensuelle ou à la résiliation) est préparée **hors système** par RIYADA ONE | Plateforme |
 | F-PLT-07 | Page d'accueil publique `fluxyrh.app` (présentation) | Plateforme |
 | F-PLT-08 | Fiche « Application mobile » par entreprise : identifiants de l'app, export de la configuration de build (flavor), liens des stores qui déclenchent l'invitation à installer l'app | Plateforme |
 
@@ -214,14 +214,14 @@ Une personne n'a **qu'une identité** (base générale) mais un **rattachement p
 | ID | Exigence | Offre |
 |---|---|---|
 | F-EMP-01 | L'invitation d'un employé porte son affectation (poste, structure, site, manager, type, date d'embauche) ; à l'acceptation, le dossier est créé avec un **matricule automatique** selon le format de l'entreprise | Socle |
-| F-EMP-02 | Types d'employé : CDI, CDD, stagiaire, apprenti, journalier, saisonnier, prestataire, intérimaire, consultant ; liste extensible par l'entreprise ; un type indique s'il entre dans la paie interne | Socle |
+| F-EMP-02 | Types d'employé : CDI, CDD, stagiaire, apprenti, journalier, saisonnier, prestataire, intérimaire, consultant, livrés par défaut dans la langue officielle de l'entreprise, modifiables et désactivables ; liste extensible par l'entreprise ; un type indique s'il entre dans la paie interne | Socle |
 | F-EMP-03 | L'employé complète son dossier ; chaque donnée vérifiable suit `À vérifier` → `Vérifiée` / `Rejetée` (motif) ; **toute modification ultérieure repasse `À vérifier`** sans effacer la dernière valeur vérifiée (P3) | Socle |
 | F-EMP-04 | Liste de travail du vérificateur : données en attente, justificatif à côté de la valeur, comparaison avec la valeur précédente ; personne ne vérifie ses propres données, les coordonnées bancaires sont vérifiées par le gestionnaire de paie (par la direction pour celles d'un gestionnaire de paie), et les autres données d'un RH toujours par la direction | Socle |
 | F-EMP-05 | Types de documents **paramétrés par l'entreprise** (obligatoire ou non, avec ou sans date d'expiration, qui les dépose, qui les voit) ; alerte avant expiration | Socle |
 | F-EMP-06 | Taux de complétude du dossier par employé et pour l'entreprise | Socle |
 | F-EMP-07 | Cycle de l'employé : `Invité` → `Actif` → `En sortie` → `Sorti` ; un employé sorti garde son dossier en lecture seule | Socle |
 | F-EMP-08 | Cumuls annuels consultables par l'employé (brut, net, cotisations, impôt) | Socle |
-| F-EMP-09 | **Pièces obligatoires paramétrées par l'entreprise** (par type d'employé) ; tant qu'elles ne sont pas toutes `Vérifiées` : pas de demande de congé, pas de formulaire type (attestation), pas d'ordre de virement (le bulletin est calculé, le paiement reste possible hors virement) ; pointage et paie restent possibles | Socle |
+| F-EMP-09 | **Pièces obligatoires paramétrées par l'entreprise** (par type d'employé) ; tant qu'elles ne sont pas toutes `Vérifiées` : pas de demande de congé, pas de formulaire type (attestation), signalement dans le suivi des paiements ; pointage et paie restent possibles | Socle |
 | F-EMP-10 | Relances automatiques de l'employé (notification, e-mail) et indicateur de complétude pour le RH | Socle |
 
 ### 7.5 Cartes NFC employé
@@ -232,8 +232,8 @@ Une personne n'a **qu'une identité** (base générale) mais un **rattachement p
 | F-NFC-02 | Cycle `Préparée` (admin entreprise) → `Encodée` (plateforme, Console) → `Livrée` → `Remise` → `Active` ; `Désactivée` (perte, vol, sortie) | Socle |
 | F-NFC-03 | Badge vérifiable : page publique indiquant si la personne est **actuellement en poste** dans l'entreprise (nom, photo, poste), sans autre donnée, limitée et journalisée | Socle |
 | F-NFC-04 | Accès rapide : un acteur habilité scanne la carte pour ouvrir le dossier, avec le contenu filtré par ses droits | Socle |
-| F-NFC-05 | Connexion à l'app par carte + PIN (option de l'entreprise), nombre d'essais limité, appareils révoqués à la désactivation de la carte | Socle |
-| F-NFC-06 | Signature d'actions par carte : signature de contrat, accusé de réception (bulletin, document, matériel, courrier), confirmation de pointage ; chaque signature est horodatée et journalisée | Socle |
+| F-NFC-05 | Connexion à l'app par carte + PIN (option choisie par chaque utilisateur pour ses appareils), nombre d'essais limité, appareils révoqués à la désactivation de la carte | Socle |
+| F-NFC-06 | Signature d'actions : signature de contrat, accusé de réception (bulletin, document, matériel, courrier) avec ou sans carte (mot de passe sur le web, code ou biométrie dans l'app) ; confirmation de pointage toujours par carte ; chaque signature est horodatée, journalisée et garde son moyen | Socle |
 | F-NFC-07 | Design de la carte imprimée : le socle fournit **un design neutre** (noir et blanc, logo, photo) ; le module Identité ouvre **20 modèles** recto / verso aux couleurs de la charte (F-IDN-04). Aperçu en direct et export PDF pour l'impression dans les deux cas | Socle (neutre) / Identité (20 modèles) |
 
 ### 7.6 Temps de travail et présences
@@ -245,7 +245,7 @@ Une personne n'a **qu'une identité** (base générale) mais un **rattachement p
 | F-TPS-03 | Pointage hors ligne : QR et carte vérifiés à l'envoi, accepté s'il est transmis dans une fenêtre configurable (48 h proposées) | Socle |
 | F-TPS-04 | Calcul automatique : heures travaillées, retard, départ anticipé, absence non justifiée, selon le planning | Socle |
 | F-TPS-05 | Correction de pointage par le manager, motif obligatoire, journalisée ; jamais sur une période de paie clôturée | Socle |
-| F-TPS-06 | Heures supplémentaires : règles **paramétrables par l'entreprise** (seuils, majorations par tranche, nuit, jour férié, plafonds) ; déclarées par le manager → `Validées` / `Refusées` par le RH → intégrées aux variables de paie | Socle |
+| F-TPS-06 | Heures supplémentaires : règles **paramétrables par l'entreprise** (seuils, majorations par tranche, nuit, jour férié, plafonds) ; **établies à l'avance** par le manager (sans cela, le temps au-delà du planning n'est pas compté), minutes réalisées calculées d'après les pointages → `Validées` / `Refusées` par le RH → intégrées aux variables de paie | Socle |
 | F-TPS-07 | Feuille de temps mensuelle par employé, export | Socle |
 
 ### 7.7 Congés et absences
@@ -271,13 +271,13 @@ Une personne n'a **qu'une identité** (base générale) mais un **rattachement p
 | ID | Exigence | Offre |
 |---|---|---|
 | F-PAY-01 | **Rubriques entièrement paramétrables** par l'entreprise : gains (primes, indemnités), cotisations salariales et patronales, impôts, retenues ; mode de calcul (montant fixe, pourcentage d'une base, barème par tranches, formule), plafond, caractère imposable / soumis à cotisation | Socle |
-| F-PAY-02 | **Pré-paramétrage Tchad** livré à la création (CNPS salarié et employeur, IRPP par tranches, CAC, taxes patronales), modifiable ; taux à faire valider par un expert avant mise en production | Socle |
+| F-PAY-02 | **Aucun paramétrage de pays livré** : chaque entreprise saisit ses rubriques, taux et barèmes selon sa législation (décision 0002) ; des jeux de démonstration servent aux tests | Socle |
 | F-PAY-03 | Historique des versions du paramétrage avec date d'effet : une modification ne change pas les bulletins passés | Socle |
 | F-PAY-04 | Le salaire de base vient du contrat actif ; les autres rubriques fixes de l'employé sont saisies par le gestionnaire de paie | Socle |
 | F-PAY-05 | Période de paie : `Ouverte` → `Variables validées` (RH : présences, congés, heures sup, événements) → `Calculée` → `Contrôlée` (gestionnaire de paie) → `Approuvée` (direction) → `Clôturée` (bulletins publiés, période verrouillée) ; une période par **fréquence de paie** utilisée (mensuelle, quinzaine, hebdomadaire, journalière), la fréquence étant fixée par employé (défaut issu du type d'employé) | Socle |
 | F-PAY-06 | Checklist intégrée à chaque période, avec étapes bloquantes ; sa dernière étape est l'**ouverture de la période suivante**, proposée à la clôture, ou faite par le système si l'entreprise active l'ouverture automatique pour cette fréquence | Socle |
 | F-PAY-07 | Bulletin PDF (mentions légales de l'entreprise), publié dans l'espace de l'employé, accusé de réception par carte ; réimpression des périodes passées | Socle |
-| F-PAY-08 | Statut de paiement par bulletin (`À payer` → `Payé` / `Échec`) ; ordres de virement par banque, **toutes banques**, formats de fichier paramétrables par l'entreprise | Socle |
+| F-PAY-08 | Statut de paiement par bulletin (`À payer` → `Payé` / `Échec`), enregistré par le gestionnaire de paie : les paiements (virements, espèces, mobile money) se font **hors de FluxyRH** | Socle |
 | F-PAY-09 | Journal de paie et états de cotisations par période, export | Socle |
 | F-PAY-10 | Avances et prêts sur salaire, **activables par l'entreprise** selon sa politique (plafonds, nombre d'échéances) : `Demandé` (employé) → `Accepté` (gestionnaire de paie) → `Approuvé` (direction) / `Refusé` (motif) → `En remboursement` → `Soldé` ; échéances prélevées en retenue sur les paies suivantes | Socle |
 
@@ -419,29 +419,11 @@ La carte est **payée par l'employé** à RIYADA ONE, hors système, comme la ca
 
 ### 8.5 Version et ordre de développement
 
-**Toutes les exigences de ce PRD font partie de la version 1.0** : la première mise en production comprend le socle, les cinq modules et l'option Identité. Le développement avance **domaine par domaine**, chaque phase étant livrée, testée et recettée avant la suivante. Les écrans mobiles d'un domaine sont développés dans la même phase que ses écrans web.
+**Toutes les exigences de ce PRD font partie de la version 1.0** : la première mise en production comprend le socle, les cinq modules et l'option Identité. Le développement avance **module par module**, chaque module étant livré, testé et recetté avant le suivant.
 
-Ordre proposé (à confirmer dans la feuille de route) :
+Ordre retenu (décision 0001, 2026-10-27) : **l'application web complète d'abord** (écrans et API `/api/v1`), puis les applications mobiles **FluxyRH Entreprise**, **FluxyRH Borne** et **FluxyRH Console**, dans cet ordre, puis la mise en production. Les gros modules sont découpés par rôle, dans l'ordre où la donnée circule.
 
-| Phase | Domaines | Exigences |
-|---|---|---|
-| 1 | Plateforme, administration, accès | F-PLT, F-ADM |
-| 2 | Organisation, sites, bornes | F-ORG |
-| 3 | Dossier authentique | F-EMP |
-| 4 | Cartes NFC | F-NFC |
-| 5 | Temps de travail, pointage, heures sup | F-TPS |
-| 6 | Congés et absences | F-ABS |
-| 7 | Contrats | F-CTR |
-| 8 | Paie | F-PAY |
-| 9 | Communication, centre d'aide | F-COM, F-AID |
-| 10 | Module Conformité | F-CNF |
-| 11 | Module Processus RH | F-PRO |
-| 12 | Module Pilotage | F-PIL |
-| 13 | Module Masse salariale | F-MSA |
-| 14 | Module Talents | F-TAL |
-| 15 | Module Identité (chartes documentaires, designs de carte) | F-IDN |
-
-L'application mobile (F-MOB) est construite au fil des phases ; la marque blanche et la publication sont finalisées avant la mise en production.
+L'ordre détaillé, les dépendances et la couverture de chaque exigence sont dans `04-planification/plan-implementation/` ; le statut de chaque module dans `04-planification/ROADMAP.md`.
 
 ---
 
@@ -457,7 +439,7 @@ L'application mobile (F-MOB) est construite au fil des phases ; la marque blanch
 | NF-06 | Connectivité faible | Hors ligne mobile (F-MOB-03), cache chiffré |
 | NF-07 | Multilingue | fr / en / ar, RTL, langue par compte, langue officielle par entreprise |
 | NF-08 | Sécurité des accès | Invitation signée, 2FA, politique de mot de passe, jetons mobiles liés à l'entreprise, limites de débit |
-| NF-09 | Sauvegarde et restauration | Sauvegardes quotidiennes conservées 30 jours, mensuelles conservées 12 mois ; archive mensuelle sur demande ; archive complète restituée à la résiliation |
+| NF-09 | Sauvegarde et restauration | Sauvegardes quotidiennes conservées 30 jours, mensuelles conservées 12 mois  ; archives demandées par l'entreprise préparées hors système |
 | NF-10 | Disponibilité | 99,5 % par mois ; support < 24 h ouvrées |
 | NF-11 | Performance | Page web < 2 s ; calcul d'une paie de 200 employés < 1 min |
 | NF-13 | Conservation | Aucune suppression définitive : dossiers des employés sortis, contrats et bulletins conservés sans limite de durée |
@@ -474,7 +456,7 @@ L'application mobile (F-MOB) est construite au fil des phases ; la marque blanch
 | Recrutement complet (offres, vivier, candidatures) | Couvert par Jobyflow ; FluxyRH importe seulement les candidats retenus |
 | Formations, frais professionnels | Non retenus pour cette version |
 | Transmission électronique des déclarations aux organismes | FluxyRH prépare les données ; le dépôt reste manuel |
-| Virements bancaires automatiques | FluxyRH produit l'ordre de virement ; il ne paie pas |
+| Virements bancaires | FluxyRH n'émet ni ordre ni fichier de virement : les paiements se font hors système et le gestionnaire de paie y enregistre leur résultat |
 | Vente et encaissement des cartes NFC | Processus opérationnel de RIYADA ONE, payé par l'employé |
 | SMS | In-app, push et e-mail suffisent |
 | LDAP / SSO | Non retenu |
@@ -484,13 +466,13 @@ L'application mobile (F-MOB) est construite au fil des phases ; la marque blanch
 
 ## 11. Hypothèses, risques et dépendances
 
-**Hypothèses** : les employés acceptent de saisir leurs données ; chaque site peut afficher un QR dynamique (écran, tablette ou borne) ; une partie des employés dispose d'un Android NFC, les autres pointent sur la borne ; un expert valide le pré-paramétrage de la paie tchadienne.
+**Hypothèses** : les employés acceptent de saisir leurs données ; chaque site peut afficher un QR dynamique (écran, tablette ou borne) ; une partie des employés dispose d'un Android NFC, les autres pointent sur la borne ; chaque entreprise dispose de la compétence (interne ou expert-comptable) pour paramétrer sa paie.
 
 | Risque | Mesure |
 |---|---|
 | Employés qui ne complètent pas leur dossier | Taux de complétude, relances, blocage des congés, attestations et virements (F-EMP-09) |
 | Volume de vérifications trop lourd pour le RH | Liste de travail priorisée, vérification groupée, justificatif affiché à côté de la valeur |
-| Barèmes fiscaux mal paramétrés | Pré-paramétrage validé par un expert, versions datées, simulation avant clôture |
+| Barèmes fiscaux mal paramétrés | Prévisualisation des rubriques, versions datées, contrôle des écarts, simulation avant clôture ; accompagnement à la mise en place par RIYADA ONE |
 | Site sans réseau | Borne hors ligne avec QR généré localement (F-ORG-06) |
 | Borne volée ou clé de borne copiée | Révocation de la borne, renouvellement de la clé, carte NFC toujours exigée |
 | Perte de carte | Désactivation immédiate, pointage borne de secours avec validation manager |
@@ -516,8 +498,7 @@ L'application mobile (F-MOB) est construite au fil des phases ; la marque blanch
 
 ## 13. Questions ouvertes
 
-1. **Pré-paramétrage de la paie tchadienne** : barème IRPP et CAC à confirmer, ensemble à faire valider par un expert-comptable ou la DGI (annexe 14.3).
-2. **Ordre des phases de développement** (8.5) : à confirmer dans la feuille de route.
+Aucune question ouverte.
 
 ### Décisions prises (2026-10-27)
 
@@ -526,7 +507,11 @@ L'application mobile (F-MOB) est construite au fil des phases ; la marque blanch
 | Rémunération dans le contrat | Le RH la voit et la rédige (exception de P6) |
 | Application mobile | Marque blanche par entreprise |
 | Carte NFC | Payée par l'employé, hors système, 10 000 FCFA (émission et réémission) |
-| Versions | Tout dans la v1.0, développement domaine par domaine (8.5) |
+| Versions | Tout dans la v1.0, développement module par module (8.5) |
+| Ordre de développement | Web complet (API comprise), puis Entreprise, Borne, Console ; gros modules découpés par rôle (8.5, décision 0001) |
+| Données par défaut | Aucune donnée propre à un pays livrée (paie, jours fériés, heures sup, congés, clauses, plan comptable, banques) ; l'application sert toute entreprise, quel que soit son pays ; seeders de démonstration pour les tests (décision 0002) |
+| Connexion par carte | Option choisie par chaque utilisateur, pas par l'entreprise (F-NFC-05) |
+| Langue des documents | Les documents générés sont rédigés dans la langue officielle de l'entreprise |
 | Prix | Grille 8.3, −10 % en annuel |
 | Avances et prêts | Circuit employé → paie → direction, activable par l'entreprise (F-PAY-10) |
 | Dossier incomplet | Pièces obligatoires paramétrées ; blocage congés, attestations, virements ; relances (F-EMP-09, F-EMP-10) |
@@ -571,9 +556,11 @@ L'application mobile (F-MOB) est construite au fil des phases ; la marque blanch
 | Admin voit tout | Bulletins et banque invisibles pour l'admin et le RH ; le RH ne voit que la rémunération contractuelle |
 | App Flutter unique | App React Native en marque blanche par entreprise |
 
-### 14.3 Pré-paramétrage de la paie tchadienne (proposition à valider par un expert)
+### 14.3 Exemple de paramétrage de paie tchadien (jeu de démonstration)
 
-Ces valeurs sont chargées à la création d'une entreprise (F-PAY-02). Elles restent **modifiables**, avec une date d'effet (F-PAY-03). La colonne « Fiabilité » indique ce qui reste à confirmer avant la mise en production.
+**Depuis la décision 0002, ces valeurs ne sont plus chargées à la création d'une entreprise** : elles servent seulement au jeu de démonstration et aux tests. Texte d'origine conservé ci-dessous pour mémoire.
+
+Ces valeurs étaient chargées à la création d'une entreprise (F-PAY-02). Elles restent **modifiables**, avec une date d'effet (F-PAY-03). La colonne « Fiabilité » indique ce qui reste à confirmer avant la mise en production.
 
 | Rubrique | Part | Taux / montant | Base | Fiabilité | Source |
 |---|---|---|---|---|---|

@@ -154,10 +154,10 @@ Les dépôts sont rangés dans un dossier d'espace de travail `FluxyRH/`, qui n'
 | Dépôt | Chemin local | Contenu |
 |---|---|---|
 | fluxyrh-docs | `FluxyRH-docs/` | Orchestration : spécifications (PRD, TRD, APPFLOW, UX/UI, BACKEND SCHEMA), architecture, ROADMAP, recette, livraisons (JOURNAL), exploitation, commercial, originaux de la configuration Claude Code |
-| fluxyrh-app | `FluxyRH-web/app/` | Application Laravel |
-| fluxyrh-entreprise | `FluxyRH-mobile/entreprise/` | App de l'entreprise, un flavor par entreprise |
-| fluxyrh-borne | `FluxyRH-mobile/borne/` | App de borne de site |
-| fluxyrh-console | `FluxyRH-mobile/console/` | App plateforme (encodage NFC) |
+| fluxyrh-w-app | `FluxyRH-web/app/` | Application Laravel |
+| fluxyrh-m-entreprise | `FluxyRH-mobile/entreprise/` | App de l'entreprise, un flavor par entreprise |
+| fluxyrh-m-borne | `FluxyRH-mobile/borne/` | App de borne de site |
+| fluxyrh-m-console | `FluxyRH-mobile/console/` | App plateforme (encodage NFC) |
 | fluxyrh-marketing | `FluxyRH-marketing/` | Vidéos, carrousels, flyers, présentations |
 | — | `_local/` | Fichiers du poste, jamais versionnés |
 
@@ -232,7 +232,7 @@ Mécanique identique à UnivPlus.
 - Aucune clé étrangère SQL ni jointure entre les deux bases ; une référence croisée est une colonne `uuid` résolue par une méthode applicative.
 - Un job ne transporte jamais un model `tenant` : `companyId` + identifiants scalaires, puis `connectTo()` dans le job.
 - Migrations : base générale dans `database/migrations/`, entreprise dans `database/migrations/tenant/`.
-- Provisionnement par `CompanyProvisioningService` (étapes idempotentes : base, migrations, clé de données, pré-paramétrage de la paie tchadienne, abonnement, modules, invitation du premier admin, journal). La commande de provisionnement **efface la base** : uniquement pour une entreprise neuve. Migrations des entreprises existantes par `deploy/debian/migrate-tenants.php`.
+- Provisionnement par `CompanyProvisioningService` (étapes idempotentes : base, migrations, clé de données, données techniques, abonnement, modules, invitation du premier admin, journal ; aucune donnée propre à un pays, décision 0002). La commande de provisionnement **efface la base** : uniquement pour une entreprise neuve. Migrations des entreprises existantes par `deploy/debian/migrate-tenants.php`.
 
 ---
 
@@ -461,7 +461,7 @@ Une **application Borne unique** (une seule fiche store), qui s'appaire à n'imp
 - **Rubriques** : code, libellé (3 langues), nature (`gain`, `cotisation`, `impot`, `retenue`, `information`) et payeur (`salarie`, `employeur`), ordre de calcul, indicateurs (imposable, soumis à cotisation, apparaît sur le bulletin), compte comptable (module Conformité).
 - **Modes de calcul** : `fixe`, `pourcentage` (taux × base nommée, plafond / plancher), `bareme` (tranches progressives ou par paliers, base annualisée ou non), `formule`.
 - **Versions** : chaque modification crée une **version du paramétrage** avec date d'effet ; une période de paie se calcule avec la version en vigueur à sa date et la **référence** ; les bulletins passés ne changent jamais.
-- **Pré-paramétrage Tchad** chargé au provisionnement (annexe 14.3 du PRD), sans aucun taux dans le code.
+- **Aucun paramétrage de pays livré** (décision 0002) : chaque entreprise saisit le sien ; l'exemple tchadien de l'annexe 14.3 du PRD n'est qu'un seeder de démonstration et de test, sans aucun taux dans le code.
 
 ### 14.2 Formules
 
